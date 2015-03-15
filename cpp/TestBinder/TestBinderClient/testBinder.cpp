@@ -8,12 +8,14 @@
 #include "../TestBinderServer/ITestBinderService.h"
 
 
-#include "TestBinderService.h"
+#include "../TestBinderServer/TestBinderService.h"
 
 using namespace android;
 
 int main(int argc, char** argv)
  {
+	LOGI("binderclient");
+    printf("binderclient --\n");
 	int sum = 0;
 	sp<ITestBinderService> mTestBinserService;
 	if (mTestBinserService.get() == 0) {

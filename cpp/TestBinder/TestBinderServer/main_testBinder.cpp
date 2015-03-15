@@ -19,6 +19,7 @@ int main(int argc, char** argv)
 	LOGI("TestBinderService End");
 	ProcessState::self()->startThreadPool();
 	IPCThreadState::self()->joinThreadPool();
+	LOGI("TestBinderService End");
 	return 0;
 
 }

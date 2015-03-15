@@ -10,12 +10,13 @@ LOCAL_MODULE_TAGS := eng
 
 LOCAL_SRC_FILES:= \
     ITestBinderService.cpp \
-    
+	testBinder.cpp
+
 
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsurfaceflinger_client
 
-LOCAL_MODULE:= libtestBinderClient
+LOCAL_MODULE:= testbinderclient
 
 LOCAL_C_INCLUDES := \
 	$(TOP)/hardware/libhardware/include/ \
@@ -24,4 +25,4 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_PRELINK_MODULE := false
 
-include $(BUILD_SHARED_LIBRARY)
+include $(BUILD_EXECUTABLE)

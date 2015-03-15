@@ -6,31 +6,30 @@
 
 namespace android {
 
-enum {
-	TEST_ADD = IBinder::FIRST_CALL_TRANSACTION,
-};
+//IMPLEMENT_META_INTERFACE(TestBinderService, "android.test.ITestBinderService");
+// frameworks/base/include/binder/IInterface.h
+//#define IMPLEMENT_META_INTERFACE(INTERFACE, NAME)           /
 
-class BpTestBinderService: public BpInterface<ITestBinderService> {
-public:
-	BpTestBinderService(const sp<IBinder>& impl) :
-		BpInterface<ITestBinderService> (impl) {
-	}
+const String16 ITestBinderService::descriptor("TestBinderService");
+const String16& ITestBinderService::getInterfaceDescriptor() const {
+    return ITestBinderService::descriptor;
+}
 
-	int add(int a, int b) {
-		
-		Parcel data, reply;
-		LOGI("Enter BpTestBinderService add,a = %d , b = %d", a, b);
-		data.writeInterfaceToken(ITestBinderService::getInterfaceDescriptor());
-		data.writeInt32(a);
-		data.writeInt32(b);
-		remote()->transact(TEST_ADD, data, &reply);
-		int sum = reply.readInt32();
-		LOGI("BpTestBinderService sum = %d", sum);
-		return sum;
-	}
-};
+sp<ITestBinderService> ITestBinderService::asInterface(const sp<IBinder>& obj) {
+    sp<ITestBinderService> intr;
+    if (obj != NULL) {
+        intr = static_cast<ITestBinderService*> (
+            obj->queryLocalInterface(ITestBinderService::descriptor).get()
+            );
+        if (intr == NULL) {
+            intr = new BpTestBinderService(obj);
+        }
+    }
+    return intr;
+}
 
-IMPLEMENT_META_INTERFACE(TestBinderService, "android.test.ITestBinderService");
+ITestBinderService::ITestBinderService(){}
+ITestBinderService::~ITestBinderService() {}
 
 // ----------------------------------------------------------------------
 
@@ -38,7 +37,7 @@ status_t BnTestBinderService::onTransact(uint32_t code, const Parcel& data,
 		Parcel* reply, uint32_t flags) {
 	switch (code) {
 	case TEST_ADD: {
-		
+
 		CHECK_INTERFACE(ITestBinderService, data, reply);
 		int a = data.readInt32();
 		int b = data.readInt32();
