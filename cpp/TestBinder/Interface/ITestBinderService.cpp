@@ -36,20 +36,15 @@ ITestBinderService::~ITestBinderService() {}
 status_t BnTestBinderService::onTransact(uint32_t code, const Parcel& data,
 		Parcel* reply, uint32_t flags) {
 	switch (code) {
-	case TEST_ADD: {
-
-		CHECK_INTERFACE(ITestBinderService, data, reply);
-		int a = data.readInt32();
-		int b = data.readInt32();
-		LOGI("Enter BnTestBinderService add,a = %d , b = %d", a, b);
-		int sum = 0;
-		sum  = add(a, b);
-		LOGI("BnTestBinderService sum = %d", sum);
-		 reply->writeInt32(sum);
-		return sum;
-	}
-	default:
-		return BBinder::onTransact(code, data, reply, flags);
+        case TRANSACTION_BeginAddTest: {
+            CHECK_INTERFACE(ITestBinderService, data, reply);
+            LOGI("Enter BnTestBinderService ");
+            sp<IAddTest> _result = BeginAddTest();
+            reply.writeStrongBinder(_result->asBinder());
+            return NO_ERROR;
+        }
+        default:
+            return BBinder::onTransact(code, data, reply, flags);
 	}
 }
 

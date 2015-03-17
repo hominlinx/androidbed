@@ -11,7 +11,7 @@ namespace android {
 class Parcel;
 
 enum {
-	TEST_ADD = IBinder::FIRST_CALL_TRANSACTION,
+	TRANSACTION_BeginAddTest = IBinder::FIRST_CALL_TRANSACTION,
 };
 
 class ITestBinderService: public IInterface {
@@ -23,7 +23,7 @@ public:
     ITestBinderService();
     virtual ~ITestBinderService();
 
-	virtual int add(int a, int b) = 0;
+    virtual sp<IAddTest> BeginAddTest() = 0;
 };
 
 //BnInterface : public ITestBinderService , public BBinder
@@ -44,18 +44,13 @@ public:
 		BpInterface<ITestBinderService> (impl) {
 	}
 
-	int add(int a, int b) {
-
-		Parcel data, reply;
-		LOGI("Enter BpTestBinderService add,a = %d , b = %d", a, b);
-		data.writeInterfaceToken(ITestBinderService::getInterfaceDescriptor());
-		data.writeInt32(a);
-		data.writeInt32(b);
-		remote()->transact(TEST_ADD, data, &reply);
-		int sum = reply.readInt32();
-		LOGI("BpTestBinderService sum = %d", sum);
-		return sum;
-	}
+    sp<IAddTest> BeginAddTest() {
+        Parcel data, reply;
+        data.writeInterfaceToke(ITestBinderService::getInterfaceDescriptor());
+        remote()->transact(TRANSACTION_BeginAddTest, data, &reply);
+        sp<IAddTest> sp = IAddTest::asInterface(reply.readStrongBinder());
+        return sp;
+    }
 };
 
 }

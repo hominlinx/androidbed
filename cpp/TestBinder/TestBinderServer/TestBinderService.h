@@ -10,6 +10,7 @@ class TestBinderService: public BnTestBinderService {
 public:
 	static void instantiate();
 	int add(int a,int b);
+    sp<IAddTest> BeginAddTest();
 private:
 	TestBinderService();
 	virtual ~TestBinderService();

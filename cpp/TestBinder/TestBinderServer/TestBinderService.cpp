@@ -5,6 +5,7 @@
 #include <binder/IPCThreadState.h>
 
 #include "TestBinderService.h"
+#include "../Interface/IAddTest.h"
 static int debug_flag = 1;
 namespace android {
 
@@ -28,6 +29,11 @@ int TestBinderService::add(int a,int b) {
 
 	LOGI("TestBinderService::add a = %d, b = %d.", a , b);	
 	return a+b;
+}
+
+sp<IAddTest> TestBinderService::BeginAddTest() {
+    sp<IAddTest> addTest = new AddTestService();
+    return addTest;
 }
 
 }

@@ -31,7 +31,8 @@ int main(int argc, char** argv)
 		mTestBinserService = interface_cast<ITestBinderService> (binder);
 		LOGE_IF(mTestBinserService == 0, "no ITestBinserService!?");
 	}
-	sum = mTestBinserService->add(3, 4);
+    sp<IAddTest> test = mTestBinserService->BeginAddTest();
+    sum = test->Add(2, 4);
 	LOGI("sum = %d", sum);
 	return 0;
 
