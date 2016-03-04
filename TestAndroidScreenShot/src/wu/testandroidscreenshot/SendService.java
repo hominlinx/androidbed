@@ -14,10 +14,14 @@ import java.net.UnknownHostException;
 import wu.lib.util.Client;
 import wu.lib.util.Packet;
 import wu.lib.util.Util;
+import wu.lib.util.udpReceiveAndtcpConnect;
+import wu.lib.util.TcpSend;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.util.Log;
 
 public class SendService extends Service  {
@@ -25,9 +29,9 @@ public class SendService extends Service  {
 	MyApplication myApplication; 
 	MainActivity mainActivity;
 	Client user;
-	MySendCommondThread mSendCommondThread;
-	MySendFileThread mSendFileThread;
 	
+	//MySendFileThread mSendFileThread;
+	TcpSend tcpSend;
 	 /**
 	  * 图片开始的标识
 	  */
@@ -40,9 +44,13 @@ public class SendService extends Service  {
 	  * 文件名
 	  */
 	 private final String FILE_NAME = "/sdcard/my/test.jpg";
+	 
+	 public final static int MSG_ID1 = 0x222;
+	 
 
 	
 	public static final String TAG = "Hominlinx==>SendService";
+	
 	
 	@Override  
 	public void onCreate() {  
@@ -50,6 +58,7 @@ public class SendService extends Service  {
 		myApplication = (MyApplication)getApplication();  
 		mainActivity = myApplication.getMainAct();
 		user = mainActivity.getClient();
+		tcpSend = new TcpSend(user);
 		Log.d(TAG, "onCreate() executed");  
 	}  
 
@@ -59,8 +68,11 @@ public class SendService extends Service  {
 		//mSendCommondThread = new MySendCommondThread();
 		//mSendCommondThread.start();
 		
-		mSendFileThread = new MySendFileThread();
-		mSendFileThread.start();
+		new udpReceiveAndtcpConnect(handler_for_udpReceiveAndtcpSend, user).start();
+//		mSendFileThread = new MySendFileThread();
+//		mSendFileThread.start();
+		
+		
 		
 		return super.onStartCommand(intent, flags, startId);  
 		
@@ -69,6 +81,9 @@ public class SendService extends Service  {
 	@Override  
 	public void onDestroy() {  
 		super.onDestroy();  
+		//quitFlag = true;
+		tcpSend.stopTcp();
+		
 		Log.d(TAG, "onDestroy() executed");  
 	}  
 
@@ -79,112 +94,28 @@ public class SendService extends Service  {
 		return null;
 	}
 
-	boolean quitFlag = false;
-	class MySendCommondThread extends Thread{
-		
-		public void run() {
-			while (!quitFlag) {
-				Log.d(TAG, "sendcommond thread run");
-				Packet packet=new Packet();
-				packet.pack("test");
-				
-				user.send(packet);
-				
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}		
-		}
-	}
-	
-	/**
-	 * 发送文件线程
-	 * 
-	 */
-    class MySendFileThread extends Thread{	
-    	
-    	public void run() {
-    		while (!quitFlag) {
-    			Log.d(TAG, "sendfile thread run");
-    			//screenShot(FILE_NAME);
-    			Util.testShot();
-    			//sendImage();
-    			try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-    		}
+	Handler handler_for_udpReceiveAndtcpSend = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		super.handleMessage(msg);
+    		if (msg.what == MSG_ID1) { // connect ok...
+    			Log.d(TAG, "Connect ok....");
+    			mainActivity.stopUDP();
+    			tcpSend.start();
+    			//mSendFileThread = new MySendFileThread();	
+                //mSendFileThread.start();
+             }
+    		
     	}
-    }
+    };
+    
+	
 	
 	
 	 
 	
-	 public void sendImage()
-	 {
-		 try
-		 {
-			 File imageFile = new File(FILE_NAME);
-			 InputStream is = new FileInputStream(imageFile);
-			 long fileLength = imageFile.length();
-			 Log.d(TAG, "sendImage, fileLength:" + fileLength);
-			 
-			 // 发送图片开始的标识，对应image_start
-			 Packet packet = new Packet();
-			 packet.pack(IMAGE_START);
-			 user.send(packet);
-			 
-			 //发送图片文件的长度，对应image_file_length
-			 byte[] bs = longToBytes(fileLength);
-			 Packet lenPacket = new Packet();
-			 lenPacket.pack(bs);
-			 user.send(lenPacket);
-			 
-			 /*发送图片文件，对应image*/
-			 int length;
-			 byte[] b = new byte[1024];
-			 while ((length = is.read(b)) > 0)
-			 {
-				// os.write(b, 0, length);
-				 Packet imagePacket = new Packet();
-				 imagePacket.pack(b);
-				 user.send(imagePacket);
-			 }
-
-			 /*发送一条完整信息结束的标识，对应message_end*/
-			 Packet overPacket = new Packet();
-			 overPacket.pack(MESSAGE_END);
-			 user.send(overPacket);
-			 
-		 } 
-		 catch (Exception e) {
-			 e.printStackTrace();
-		 }
-	 }
-
 	 
 	 
-	 /**
-	  * 将长整型转换为byte数组
-	  * @param n
-	  * @return
-	  */
-	 public static byte[] longToBytes(long n)
-	 {
-		 byte[] b = new byte[8];
-		 b[7] = (byte) (n & 0xff);
-		 b[6] = (byte) (n >> 8 & 0xff);
-		 b[5] = (byte) (n >> 16 & 0xff);
-		 b[4] = (byte) (n >> 24 & 0xff);
-		 b[3] = (byte) (n >> 32 & 0xff);
-		 b[2] = (byte) (n >> 40 & 0xff);
-		 b[1] = (byte) (n >> 48 & 0xff);
-		 b[0] = (byte) (n >> 56 & 0xff);
-		 return b;
-	 }
+	 
+	 
 }

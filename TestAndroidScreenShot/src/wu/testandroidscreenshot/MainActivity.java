@@ -28,6 +28,8 @@ import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -73,7 +75,10 @@ public class MainActivity extends Activity  implements OnClickListener {
 		startService = (Button) findViewById(R.id.start);
 		stopService = (Button) findViewById(R.id.stop);
 		startService.setOnClickListener(this);  
-		stopService.setOnClickListener(this);  
+		stopService.setOnClickListener(this); 
+		
+		startService.setEnabled(true);
+		stopService.setEnabled(false);
 
 	}
 	
@@ -189,23 +194,48 @@ public class MainActivity extends Activity  implements OnClickListener {
 //		}  
 //	}  
 	
+
+	udpBroadCast udp = null;
+	public void startUDP() {
+		if(udp != null) {
+			udp.start();
+		}
+		
+	}
+	public void stopUDP() {
+		if (udp != null) {
+			udp.quitFlag = true;
+		}
+	}
+	
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {  
 		case R.id.start:
+			udp = new udpBroadCast();
+			startUDP();
 			Intent startIntent = new Intent(this, SendService.class);  
-			startService(startIntent);  
+			startService(startIntent); 
+			startService.setEnabled(false);
+			stopService.setEnabled(true);
+			 
 			Log.d(TAG, "AAXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
-			
-		
-//			
+	
+			break;
+		case R.id.stop:
+			stopUDP();
+			Intent stopIntent = new Intent(this, SendService.class);  
+			stopService(stopIntent); 
+			startService.setEnabled(true);
+			stopService.setEnabled(false);
+			Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 			break;
 		}
-		//	case R.id.startbtn:  
-		//		Intent startIntent = new Intent(this, SendService.class);  
-		//		startService(startIntent);  
-		
+//			case R.id.startbtn:  
+//				Intent startIntent = new Intent(this, SendService.class);  
+//				startService(startIntent);  
+
 		
 	}
 }

@@ -22,7 +22,8 @@ public class Client {
 	private final int STATE_CONNECT_FAILED=1<<4;//连接失败
 	private final int STATE_CONNECT_WAIT=1<<5;//等待连接
 	private String IP="192.168.1.100";
-	private int PORT=60000;
+	
+	private int PORT=32550;
 	
 	private int state=STATE_CONNECT_START;
 	

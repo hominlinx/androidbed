@@ -257,5 +257,94 @@ public class Util {
 		}
 	}
 
+	/**
+	  * 将长整型转换为byte数组
+	  * @param n
+	  * @return
+	  */
+	 public static byte[] longToBytes(long n)
+	 {
+		 byte[] b = new byte[8];
+		 b[7] = (byte) (n & 0xff);
+		 b[6] = (byte) (n >> 8 & 0xff);
+		 b[5] = (byte) (n >> 16 & 0xff);
+		 b[4] = (byte) (n >> 24 & 0xff);
+		 b[3] = (byte) (n >> 32 & 0xff);
+		 b[2] = (byte) (n >> 40 & 0xff);
+		 b[1] = (byte) (n >> 48 & 0xff);
+		 b[0] = (byte) (n >> 56 & 0xff);
+		 return b;
+	 }
+	 
+	 public static byte[] intToBytes(int n)
+	 {
+		 byte[] b = new byte[4];
+		 b[3] = (byte) (n & 0xff);
+		 b[2] = (byte) (n >> 8 & 0xff);
+		 b[1] = (byte) (n >> 16 & 0xff);
+		 b[0] = (byte) (n >> 24 & 0xff);
+		 return b;
+	 }
 
+	 public void sendImage(Client user)
+	 {
+//		 try
+//		 {
+//			 File imageFile = new File(FILE_NAME);
+//			 InputStream is = new FileInputStream(imageFile);
+//			 long fileLength = imageFile.length();
+//			 Log.d(TAG, "sendImage, fileLength:" + fileLength);
+//			 
+//			 // 发送图片开始的标识，对应image_start
+//			 Packet packet = new Packet();
+//			 packet.pack(IMAGE_START);
+//			 user.send(packet);
+//			 
+//			 //发送图片文件的长度，对应image_file_length
+//			 byte[] bs = longToBytes(fileLength);
+//			 Packet lenPacket = new Packet();
+//			 lenPacket.pack(bs);
+//			 user.send(lenPacket);
+//			 
+//			 /*发送图片文件，对应image*/
+//			 int length;
+//			 byte[] b = new byte[1024];
+//			 while ((length = is.read(b)) > 0)
+//			 {
+//				// os.write(b, 0, length);
+//				 Packet imagePacket = new Packet();
+//				 imagePacket.pack(b);
+//				 user.send(imagePacket);
+//			 }
+//
+//			 /*发送一条完整信息结束的标识，对应message_end*/
+//			 Packet overPacket = new Packet();
+//			 overPacket.pack(MESSAGE_END);
+//			 user.send(overPacket);
+//			 
+//		 } 
+//		 catch (Exception e) {
+//			 e.printStackTrace();
+//		 }
+	 }
+
+	 public static String bytesToHexString(byte[] src, int len){  
+			StringBuilder stringBuilder = new StringBuilder("");  
+			if (src == null || src.length <= 0) {  
+				return null;  
+			}  
+
+			for (int i = 0; i < len; i++) {  
+				int v = src[i] & 0xFF;  
+				String hv = Integer.toHexString(v);  
+				if (hv.length() < 2) {  
+					stringBuilder.append(0);  
+				}  
+
+				stringBuilder.append(hv);  
+
+			}  
+
+			return stringBuilder.toString();  
+		}  
 }
