@@ -69,20 +69,33 @@ public class udpReceiveAndtcpConnect extends Thread {
 				System.out.println("quest_ip: --------------------++++  " + quest_ip);
 				System.out.println("quest_ip: --------------------  " + quest_ip.substring(1));
 
+				
 				/* 若udp包的ip地址 是 本机的ip地址的话，丢掉这个包(不处理)*/
 
 				if( (!host_ip.equals(""))  && host_ip.equals(quest_ip.substring(1)) ) {
 					continue;
 				}
 
-
+				Log.d(TAG, "hostip:" + host_ip + ",questip:" + quest_ip.substring(1));
+				
 				boolean ret = checkRecvData(data, quest_ip.substring(1), dp.getLength());
 				if (ret) { // get valid UDP...
 					user.open(quest_ip.substring(1), 32550); //tcp connect...
-					if (user.isNeedConn()) {
+					while(user.isNeedConn()) {
 						Log.d(TAG, "tcp need connect....");
+						
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
 						user.reconn();
 					}
+//					if (user.isNeedConn()) {
+//						Log.d(TAG, "tcp need connect....");
+//						user.reconn();
+//					}
 					
 					msg = new Message();
 					msg.what = SendService.MSG_ID1;
@@ -128,7 +141,7 @@ public class udpReceiveAndtcpConnect extends Thread {
 	 */
 	private boolean checkRecvData(byte[] data, String ip, int len) {
 		
-		if ( data.length < 7 && len != 7) {
+		if ( data.length < 7 || len != 7) {
 			Log.d(TAG, "udp data's len is " + len + ", ERROR");
 			return false;
 		}
@@ -170,6 +183,11 @@ public class udpReceiveAndtcpConnect extends Thread {
 		ip[1] = (byte)Integer.parseInt(ipb[1]);
 		ip[2] = (byte)Integer.parseInt(ipb[2]);
 		ip[3] = (byte)Integer.parseInt(ipb[3]);
+		
+//		ip[3]=(byte)Integer.parseInt(ipb[0]);
+//		ip[2] = (byte)Integer.parseInt(ipb[1]);
+//		ip[1] = (byte)Integer.parseInt(ipb[2]);
+//		ip[0] = (byte)Integer.parseInt(ipb[3]);
 		return ip;
 
 	}

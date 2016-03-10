@@ -28,20 +28,30 @@ public class TcpSend extends Thread{
 	}
 	
 	public void run() {
+		Log.d(TAG, "sendfile thread run");
+		int i = 0;
 		while (!quitFlag) {
-			Log.d(TAG, "sendfile thread run");
+			
 			byte[] buf = getShot();
 			sendFrameStart(buf.length);
+			
 			sendFrameData(buf);
+			
+			sendFrameEnd();
+			
+//			if (i == 1) {
+//				quitFlag = true;
+//			}
+//			i++;
 			//screenShot(FILE_NAME);
 			//Util.testShot();
 			//sendImage();
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+//			try {
+//				Thread.sleep(1000);
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 		}
 	}
 	
@@ -49,7 +59,7 @@ public class TcpSend extends Thread{
 		long start = System.currentTimeMillis();
 		byte[] buf = null;
 		try {
-			Bitmap bm = Util.getScreenBitmap();
+			Bitmap bm = Util.getClipScreenBitmap();
 			//Util.saveMyBitmap(bm, outname);	
 			ByteArrayOutputStream baos = null ;  
 			try{  
@@ -108,13 +118,16 @@ public class TcpSend extends Thread{
 			Packet packet = new Packet();
 			packet.pack(tmpBuf);
 			user.send(packet);	
+			byte[] temp = packet.getPacket();
+			//String outPut = Util.bytesToHexString(temp, temp.length);
+			//Log.d(TAG, "sendFrameData, AAAAAA:" + temp.length);
 		}
 		int rest = len % PACKSIZE;
 		if (rest > 0) {
 			byte[] restBuf = new byte[rest];
 			System.arraycopy(buf, cnt*PACKSIZE, restBuf, 0, rest);
 			Packet packet = new Packet();
-			packet.pack(buf);
+			packet.pack(restBuf);
 			user.send(packet);
 		}
 		Log.d(TAG, "sendFrameData, len:" + len + ",cnt:" + cnt + ",rest:" + rest);
@@ -125,6 +138,10 @@ public class TcpSend extends Thread{
 		Packet packet = new Packet();
 		packet.pack(frameEnddata);
 		user.send(packet);	
+		
+		byte[] temp = packet.getPacket();
+		String outPut = Util.bytesToHexString(temp, temp.length);
+		Log.d(TAG, "sendFrameEnd, data:" + temp.length + ", it is:" + outPut);
 	}
 }
 

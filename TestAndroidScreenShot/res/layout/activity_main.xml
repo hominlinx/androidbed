@@ -10,49 +10,17 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".MainActivity" >
+
     <LinearLayout
-	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content" 
-	    android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="230dp"
+        android:orientation="vertical" >
 
 	        <LinearLayout
 			    android:layout_width="match_parent"
 			    android:layout_height="wrap_content" 
 			    android:orientation="horizontal">
-			    	    <EditText
-					        android:id="@+id/ip" 
-					        android:layout_width="match_parent"
-					        android:layout_height="wrap_content"
-					        android:layout_weight="1.0"
-					        android:hint="IP:"/>
-			    	<EditText
-					        android:id="@+id/port" 
-					        android:layout_width="match_parent"
-					        android:layout_height="wrap_content"
-					        android:layout_weight="1.0"
-					        android:hint="Port:"/>
 			</LinearLayout>
-
-			<Button
-			    android:id="@+id/open"
-			    android:layout_width="match_parent"
-			    android:layout_height="wrap_content"
-			    android:layout_marginTop="5.0dp"
-			    android:text="打开" />
-
-			<Button
-			    android:id="@+id/close"
-			    android:layout_width="match_parent"
-			    android:layout_height="wrap_content"
-			    android:layout_marginTop="5.0dp"
-			    android:text="关闭" />
-
-	    <Button
-	        android:id="@+id/reconn"
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:layout_marginTop="5.0dp"
-	        android:text="重连" />
 
 	    <Button
 	        android:id="@+id/start"
@@ -68,23 +36,25 @@
 	        android:layout_height="wrap_content"
 	        android:text="关闭服务" />
 
+	    <Button
+	        android:id="@+id/testStart"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="测试（保存jpg）" />
+
+	    <Button
+	        android:id="@+id/testStop"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="关闭测试" />
+
 	    <LinearLayout 
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5.0dp"
 	        android:layout_weight="1.0">
-	            <EditText
-			        android:id="@+id/sendContent" 
-			        android:layout_width="match_parent"
-			        android:layout_height="wrap_content"
-			        android:layout_weight="1.0"
-			        android:hint="要发送的数据"
-			        android:lines="5"/>
-			    <Button
-			        android:id="@+id/send"
-			        android:layout_width="100.0dp"
-			        android:layout_height="wrap_content"
-			        android:text="发送"/>
 	    </LinearLayout>
 	
 	    <LinearLayout 
@@ -92,18 +62,6 @@
 	        android:layout_height="wrap_content"
 	        android:layout_marginTop="5.0dp"
 	        android:layout_weight="1.0">
-	            <EditText
-			        android:id="@+id/recContent" 
-			        android:layout_width="match_parent"
-			        android:layout_height="wrap_content"
-			        android:layout_weight="1.0"
-			        android:hint="接收到的数据"
-			        android:lines="5"/>
-			    <Button
-			        android:id="@+id/clear"
-			        android:layout_width="100.0dp"
-			        android:layout_height="wrap_content"
-			        android:text="清空"/>
 	    </LinearLayout>
 	</LinearLayout>
 </ScrollView>

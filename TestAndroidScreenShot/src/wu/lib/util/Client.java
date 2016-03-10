@@ -184,14 +184,15 @@ public class Client {
 	private class Conn implements Runnable
 	{
 		public void run() {
-			Log.v(TAG,"Conn :Start");
+			
 			try {
 				while(state!=STATE_CLOSE)
 				{
 					try {
 						state=STATE_CONNECT_START;
 						socket=new Socket();
-						socket.connect(new InetSocketAddress(IP, PORT), 15*1000);
+						//socket.connect(new InetSocketAddress(IP, PORT), 15*1000);
+						socket.connect(new InetSocketAddress(IP, PORT), 0);
 						state=STATE_CONNECT_SUCCESS;
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -250,17 +251,18 @@ public class Client {
 					Packet item;
 					while(null!=(item=requestQueen.poll()))
 					{
+						//Log.d(TAG, "send data,LEN:"+ item.getPacket().length);
 						outStream.write(item.getPacket());
 						outStream.flush();
 						item=null;
 					}
 
-					Log.v(TAG,"Send :woken up AAAAAAAAA");
+					//Log.v(TAG,"Send :woken up AAAAAAAAA");
 					synchronized (lock)
 					{
 						lock.wait();
 					}
-					Log.v(TAG,"Send :woken up BBBBBBBBBB");
+					//Log.v(TAG,"Send :woken up BBBBBBBBBB");
 				}
 			}catch(SocketException e1) 
 			{

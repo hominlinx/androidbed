@@ -49,10 +49,13 @@ public class MainActivity extends Activity  implements OnClickListener {
   
     Button startService;
     Button stopService;
+    Button startTest;
+    Button stopTest;
     
     private Client user=null;
 	private EditText ip,port,sendContent,recContent;
-    
+	ScreenshotThread mScreenshotThread;
+	boolean screenshotQuit = false;
 
 	public Client getClient() {
 		return user;
@@ -69,92 +72,99 @@ public class MainActivity extends Activity  implements OnClickListener {
 		
 		myApplication = (MyApplication)getApplication();  
 		myApplication.setMainAct(this);  
-		
-		
-		
+				
 		startService = (Button) findViewById(R.id.start);
 		stopService = (Button) findViewById(R.id.stop);
 		startService.setOnClickListener(this);  
-		stopService.setOnClickListener(this); 
-		
+		stopService.setOnClickListener(this); 		
 		startService.setEnabled(true);
 		stopService.setEnabled(false);
+		
+		startTest = (Button) findViewById(R.id.testStart);
+		stopTest = (Button) findViewById(R.id.testStop);
+		startTest.setOnClickListener(this);  
+		stopTest.setOnClickListener(this);
+		startTest.setEnabled(true);
+		stopTest.setEnabled(false);
+		
 
 	}
 	
 	private void initView()
 	{
 		Log.d(TAG, "initView");
-		findViewById(R.id.open).setOnClickListener(listener);
-		findViewById(R.id.close).setOnClickListener(listener);
-		findViewById(R.id.reconn).setOnClickListener(listener);
-		findViewById(R.id.send).setOnClickListener(listener);
-		findViewById(R.id.clear).setOnClickListener(listener);
-		findViewById(R.id.start).setOnClickListener(listener);
-		findViewById(R.id.stop).setOnClickListener(listener);
+//		findViewById(R.id.open).setOnClickListener(listener);
+//		findViewById(R.id.close).setOnClickListener(listener);
+//		findViewById(R.id.reconn).setOnClickListener(listener);
+//		findViewById(R.id.send).setOnClickListener(listener);
+//		findViewById(R.id.clear).setOnClickListener(listener);
+//		findViewById(R.id.start).setOnClickListener(listener);
+//		findViewById(R.id.stop).setOnClickListener(listener);
 		
-		ip=(EditText) findViewById(R.id.ip);
-		port=(EditText) findViewById(R.id.port);
-		sendContent=(EditText) findViewById(R.id.sendContent);
-		recContent=(EditText) findViewById(R.id.recContent);
-		
-		ip.setText("172.10.11.42");
-		port.setText("60000");
+//		ip=(EditText) findViewById(R.id.ip);
+//		port=(EditText) findViewById(R.id.port);
+//		sendContent=(EditText) findViewById(R.id.sendContent);
+//		recContent=(EditText) findViewById(R.id.recContent);
+//		
+//		ip.setText("172.10.11.42");
+//		port.setText("60000");
 		
 		Util.initScreen(this);
+		mScreenshotThread = new ScreenshotThread();	
+		//Util.testShot();
 	}
 	
 	
-	private OnClickListener listener=new OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-			switch(v.getId())
-			{
-				case R.id.open:
-//					user.open();
-					//user.open(ip.getText().toString(), Integer.valueOf(port.getText().toString()));				
-					
-					break;
-					
-				case R.id.close:
-					user.close();
-					break;
-					
-				case R.id.reconn:
-					user.reconn();
-					break;
-					
-				case R.id.send:
-					Packet packet=new Packet();
-					packet.pack(sendContent.getText().toString());
-					user.send(packet);
-					sendContent.setText("");
-					break;
-					
-				case R.id.clear:
-					recContent.setText("");
-					break;
-					
-//				case R.id.start:
-//					Log.d(TAG, "startttt");
-//					Intent mIntent = new Intent();  
-//					//mIntent.setAction("XXX.XXX.XXX");//你定义的service的action  
-//					mIntent.setPackage(getPackageName());//这里你需要设置你应用的包名  
-//					startService(mIntent); 
+//	private OnClickListener listener=new OnClickListener() {
+//
+//		@Override
+//		public void onClick(View v) {
+//			switch(v.getId())
+//			{
+//				case R.id.open:
+////					user.open();
+//					//user.open(ip.getText().toString(), Integer.valueOf(port.getText().toString()));				
 //					
-//					//Intent startIntent = new Intent(MainActivity.class, SendService.class);  
-//					//startService(startIntent);  
 //					break;
 //					
-//				case R.id.stop:
-//					Intent stopIntent = new Intent();  
-//					stopService(stopIntent); 
+//				case R.id.close:
+//					user.close();
 //					break;
-			}
-		}
-		
-	};
+//					
+//				case R.id.reconn:
+//					user.reconn();
+//					break;
+//					
+//				case R.id.send:
+//					Packet packet=new Packet();
+//					packet.pack(sendContent.getText().toString());
+//					user.send(packet);
+//					sendContent.setText("");
+//					break;
+//					
+//				case R.id.clear:
+//					recContent.setText("");
+//					break;
+//					
+////				case R.id.start:
+////					Log.d(TAG, "startttt");
+////					Intent mIntent = new Intent();  
+////					//mIntent.setAction("XXX.XXX.XXX");//你定义的service的action  
+////					mIntent.setPackage(getPackageName());//这里你需要设置你应用的包名  
+////					startService(mIntent); 
+////					
+////					//Intent startIntent = new Intent(MainActivity.class, SendService.class);  
+////					//startService(startIntent);  
+////					break;
+////					
+////				case R.id.stop:
+////					Intent stopIntent = new Intent();  
+////					stopService(stopIntent); 
+////					break;
+//			}
+//		}
+//		
+//	};
 	
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -220,7 +230,7 @@ public class MainActivity extends Activity  implements OnClickListener {
 			startService.setEnabled(false);
 			stopService.setEnabled(true);
 			 
-			Log.d(TAG, "AAXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+			Log.d(TAG, "start");
 	
 			break;
 		case R.id.stop:
@@ -229,7 +239,27 @@ public class MainActivity extends Activity  implements OnClickListener {
 			stopService(stopIntent); 
 			startService.setEnabled(true);
 			stopService.setEnabled(false);
-			Log.d(TAG, "AAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+			Log.d(TAG, "stop");
+			break;
+		case R.id.testStart:
+			//mScreenshotThread = new ScreenshotThread();
+			//mScreenshotThread.start();
+			
+			Intent startIntent1 = new Intent(this, ScreenTestService.class);  
+			startService(startIntent1); 
+			
+			startTest.setEnabled(false);
+			stopTest.setEnabled(true);
+			Log.d(TAG, "testStart");
+			break;
+		case R.id.testStop:
+			//screenshotQuit = true;
+			Intent stopIntent1 = new Intent(this, ScreenTestService.class);  
+			stopService(stopIntent1); 
+			
+			startTest.setEnabled(true);
+			stopTest.setEnabled(false);
+			Log.d(TAG, "testStop");
 			break;
 		}
 //			case R.id.startbtn:  
@@ -237,6 +267,27 @@ public class MainActivity extends Activity  implements OnClickListener {
 //				startService(startIntent);  
 
 		
+	}
+	
+	/**
+	 * 保存截屏文件线程
+	 * 
+	 */
+	public class ScreenshotThread extends Thread{	
+		
+		public void run() {
+			Log.d(TAG, "ScreenshotThread thread run");
+			
+			while (!screenshotQuit) {				
+				Util.testShot();			
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
 	

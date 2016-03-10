@@ -107,15 +107,6 @@ public class SendService extends Service  {
              }
     		
     	}
-    };
-    
-	
-	
-	
-	 
-	
-	 
-	 
-	 
+    };	 
 	 
 }

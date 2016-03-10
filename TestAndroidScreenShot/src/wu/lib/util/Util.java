@@ -40,19 +40,23 @@ public class Util {
 	
 	private static final String TAG = "Hominlinx===>Util:Screenshot";
 
-	private static int height = 0;
-	private static int width = 0;
-	private static int screenHeight = 0;
-	private static int screenWidth = 0;
+	private static int height = 0; // bitmap 的高度
+	private static int width = 0;  // bitmap 的宽度
+	private static int screenHeight = 0; // 屏幕的高度
+	private static int screenWidth = 0;  // 屏幕的宽度
+	private static int min_x = 100;
+	private static int max_x = 400;
+	private static int min_y = 500;
+	private static int max_y = 1000;
 	private static int deepth = 0;
 	final static String FB0FILE1 = "/dev/graphics/fb0";
-	final static String OUTFILE = "/sdcard/my/test.jpg";
+	final static String OUTFILE = "/storage/sdcard1/my/test.jpg";
 	static File fbFile;
 	static FileInputStream graphics = null;
 	static DataInputStream dStream=null;
 	static byte[] piex=null;
 	static int colorSize = 0;
-	
+	static int offset = 8; //xiaomi
 	
 	/**
 	 * 测试截图
@@ -63,7 +67,7 @@ public class Util {
 	
 		SimpleDateFormat sdf = new SimpleDateFormat(
 				"yyyy-MM-dd_HH-mm-ss", Locale.US); 
-		String outname = "/sdcard/my/" + sdf.format(new Date()) + ".jpg";
+		String outname = "/storage/sdcard1/my/" + sdf.format(new Date()) + ".jpg";
 		
 		try {
 			Bitmap bm = getScreenBitmap();
@@ -139,27 +143,17 @@ public class Util {
 		// 初始化事件文件的权限
 		//
 		ShellUtils.execCommand("chmod 777 /dev/graphics/fb0", true);
-//		try {
-//
-//			Runtime.getRuntime().exec(
-//
-//					new String[] { "su", "-c","chmod 777 /dev/graphics/fb0" });
-//
-//		} catch (IOException e) {
-//
-//			e.printStackTrace();
-//
-//		}
 		// 获取屏幕大小：
 		DisplayMetrics metrics = new DisplayMetrics();
 		WindowManager WM = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
 		Display display = WM.getDefaultDisplay();
 		display.getMetrics(metrics);
 
-		height = metrics.heightPixels; // 屏幕高
-		width = metrics.widthPixels; // 屏幕的宽
+		width = max_x - min_x;
+		height = max_y - min_y;	
 
-		Log.d(TAG, "================ height:" + height + ",width:" + width);
+		Log.d(TAG, "screen's width:" + metrics.widthPixels + ",height:" + metrics.heightPixels);
+		Log.d(TAG, "bitmap's width:" + width + ", height:" + height);
 		
 		PixelFormat localPixelFormat1 = new PixelFormat();
 
@@ -168,12 +162,15 @@ public class Util {
 		PixelFormat.getPixelFormatInfo(pixelformat, localPixelFormat1);
 
 		deepth = localPixelFormat1.bytesPerPixel;// 位深
-		Log.d(TAG, "================pixelformat:" + pixelformat + ",deepth:" + deepth);
-		screenHeight = height;
-		screenWidth = width + 8;
-		colorSize = screenHeight * screenWidth  ;
-		piex = new byte[colorSize  * deepth]; // Just for meizu-note3
+		Log.d(TAG, "screen's pixelformat:" + pixelformat + ",deepth:" + deepth);
+		screenHeight = metrics.heightPixels;
+		screenWidth = metrics.widthPixels + offset;
+		
+		colorSize = width * height;
+		//colorSize = screenHeight * screenWidth  ;
+		piex = new byte[screenHeight *  screenWidth * deepth]; // Just for meizu-note3
 	}
+	
 	/**
 
 	 * 获取当前屏幕截图，一定要先init（只有一次）。
@@ -184,7 +181,6 @@ public class Util {
 	 * @throws IOException 
 
 	 */
-
 	@SuppressLint("NewApi")
 	public static Bitmap getScreenBitmap() throws IOException {
 
@@ -202,8 +198,8 @@ public class Util {
 		DataInputStream dStream = new DataInputStream(graphics);
 		dStream.readFully(piex);
 		dStream.close();
-
-		int[] colors = new int[colorSize]; // 这个只适用于魅族note2.
+		
+		int[] colors = new int[screenHeight *  screenWidth]; // 
 		// 将rgba转为色值
 		for (int m = 0; m < screenHeight ; m++ ) {
 			for (int n = 0; n < screenWidth; n++) {
@@ -211,11 +207,70 @@ public class Util {
 				int g = (piex[(m * screenWidth + n) *4 + 1] & 0xFF);
 				int b = (piex[(m * screenWidth + n) *4 + 2] & 0xFF);
 				int a = (piex[(m * screenWidth + n) *4 + 3] & 0xFF);
-				//colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
-				colors[(screenHeight - 1 -m )* screenWidth + ( screenWidth - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
+				colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
+				//colors[(screenHeight - 1 -m )* screenWidth + ( screenWidth - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
 			}
 		}
+		// 保存图片
+		// piex生成Bitmap
+		long end = System.currentTimeMillis();
+		Log.i(TAG, " shot screen time cost:" + (end - start));
+		return Bitmap.createBitmap(colors, (screenWidth ), screenHeight,
+				Bitmap.Config.ARGB_8888);
+	}
+	
+	
+	/**
+
+	 * 获取当前屏幕截图，一定要先init（只有一次）。
+
+	 * @param activity
+
+	 * @return
+	 * @throws IOException 
+
+	 */
+	@SuppressLint("NewApi")
+	public static Bitmap getClipScreenBitmap() throws IOException {
+
+		// 获取屏幕大小：
+		// 获取显示方式
 		
+		long start = System.currentTimeMillis();
+		
+		try {
+			graphics = new FileInputStream(fbFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			return null;
+		}
+		DataInputStream dStream = new DataInputStream(graphics);
+		dStream.readFully(piex);
+		dStream.close();
+		
+		int[] colors = new int[colorSize]; // 
+		// 将rgba转为色值
+//		for (int m = 0; m < screenHeight ; m++ ) {
+//			for (int n = 0; n < screenWidth; n++) {
+//				int r = (piex[(m * screenWidth + n) *4] & 0xFF);
+//				int g = (piex[(m * screenWidth + n) *4 + 1] & 0xFF);
+//				int b = (piex[(m * screenWidth + n) *4 + 2] & 0xFF);
+//				int a = (piex[(m * screenWidth + n) *4 + 3] & 0xFF);
+//				colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
+//				//colors[(screenHeight - 1 -m )* screenWidth + ( screenWidth - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
+//			}
+//		}
+		
+		for (int m = min_y; m < max_y; m++) {
+			for (int n = min_x; n < max_x; n++) {
+				int r = (piex[(m * screenWidth + n) * 4] & 0xFF);
+				int g = (piex[(m * screenWidth + n) *4 + 1] & 0xFF);
+				int b = (piex[(m * screenWidth + n) *4 + 2] & 0xFF);
+				int a = (piex[(m * screenWidth + n) *4 + 3] & 0xFF);
+				//colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
+				colors[(m - min_y) * width + (n - min_x)] = (a << 24) + (r << 16) + (g << 8) + b;
+			}
+		}
 //		for (int m = 0; m < colors.length; m++) {
 //			int r = (piex[m * 4] & 0xFF);
 //			int g = (piex[m * 4 + 1] & 0xFF);
@@ -227,7 +282,7 @@ public class Util {
 		// piex生成Bitmap
 		long end = System.currentTimeMillis();
 		Log.i(TAG, " shot screen time cost:" + (end - start));
-		return Bitmap.createBitmap(colors, (width + 8), height,
+		return Bitmap.createBitmap(colors, (width ), height,
 				Bitmap.Config.ARGB_8888);
 	}
 
@@ -286,61 +341,20 @@ public class Util {
 		 return b;
 	 }
 
-	 public void sendImage(Client user)
-	 {
-//		 try
-//		 {
-//			 File imageFile = new File(FILE_NAME);
-//			 InputStream is = new FileInputStream(imageFile);
-//			 long fileLength = imageFile.length();
-//			 Log.d(TAG, "sendImage, fileLength:" + fileLength);
-//			 
-//			 // 发送图片开始的标识，对应image_start
-//			 Packet packet = new Packet();
-//			 packet.pack(IMAGE_START);
-//			 user.send(packet);
-//			 
-//			 //发送图片文件的长度，对应image_file_length
-//			 byte[] bs = longToBytes(fileLength);
-//			 Packet lenPacket = new Packet();
-//			 lenPacket.pack(bs);
-//			 user.send(lenPacket);
-//			 
-//			 /*发送图片文件，对应image*/
-//			 int length;
-//			 byte[] b = new byte[1024];
-//			 while ((length = is.read(b)) > 0)
-//			 {
-//				// os.write(b, 0, length);
-//				 Packet imagePacket = new Packet();
-//				 imagePacket.pack(b);
-//				 user.send(imagePacket);
-//			 }
-//
-//			 /*发送一条完整信息结束的标识，对应message_end*/
-//			 Packet overPacket = new Packet();
-//			 overPacket.pack(MESSAGE_END);
-//			 user.send(overPacket);
-//			 
-//		 } 
-//		 catch (Exception e) {
-//			 e.printStackTrace();
-//		 }
-	 }
 
 	 public static String bytesToHexString(byte[] src, int len){  
 			StringBuilder stringBuilder = new StringBuilder("");  
-			if (src == null || src.length <= 0) {  
+			if (src == null || src.length <= 0) { 
+				Log.d(TAG, "XXXXX" + src + ",len" + src.length);
 				return null;  
 			}  
-
 			for (int i = 0; i < len; i++) {  
 				int v = src[i] & 0xFF;  
-				String hv = Integer.toHexString(v);  
+				String hv = Integer.toHexString(v); 
+				
 				if (hv.length() < 2) {  
 					stringBuilder.append(0);  
-				}  
-
+				}  				
 				stringBuilder.append(hv);  
 
 			}  
