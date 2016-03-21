@@ -29,29 +29,30 @@ public class TcpSend extends Thread{
 	
 	public void run() {
 		Log.d(TAG, "sendfile thread run");
-		int i = 0;
 		while (!quitFlag) {
-			
+			long start = System.currentTimeMillis();
 			byte[] buf = getShot();
 			sendFrameStart(buf.length);
 			
 			sendFrameData(buf);
 			
 			sendFrameEnd();
-			
-//			if (i == 1) {
-//				quitFlag = true;
-//			}
-//			i++;
+			long end1 = System.currentTimeMillis();
 			//screenShot(FILE_NAME);
 			//Util.testShot();
 			//sendImage();
-//			try {
-//				Thread.sleep(1000);
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
+			try {
+				long temp = end1 - start;
+				if ( temp < 250) {
+					Thread.sleep(250 - temp);
+				}
+				//Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			long end = System.currentTimeMillis();
+			Log.i(TAG, "time cost:" + (end - start));
 		}
 	}
 	
@@ -82,7 +83,7 @@ public class TcpSend extends Thread{
 			e.printStackTrace();
 		}
 		long end = System.currentTimeMillis();
-		Log.i(TAG, "time cost:" + (end - start));
+		//Log.i(TAG, "time cost:" + (end - start));
 		
 		return buf;
 	}
@@ -106,7 +107,7 @@ public class TcpSend extends Thread{
 		user.send(packet);
 		byte[] temp = packet.getPacket();
 		String outPut = Util.bytesToHexString(temp, temp.length);
-		Log.d(TAG, "sendFrameStart, tempppp:" + temp.length + ", it is:" + outPut);
+		//Log.d(TAG, "sendFrameStart, tempppp:" + temp.length + ", it is:" + outPut);
 	}
 	
 	private void sendFrameData(byte[] buf) {
@@ -130,7 +131,7 @@ public class TcpSend extends Thread{
 			packet.pack(restBuf);
 			user.send(packet);
 		}
-		Log.d(TAG, "sendFrameData, len:" + len + ",cnt:" + cnt + ",rest:" + rest);
+		//Log.d(TAG, "sendFrameData, len:" + len + ",cnt:" + cnt + ",rest:" + rest);
 	}
 	
 	static byte[] frameEnddata = { 0x00, 0x05, 0x41, 0x75, 0x74, 0x6F, 0x49, 0x4F, 0x43, 0x6F };
@@ -141,7 +142,7 @@ public class TcpSend extends Thread{
 		
 		byte[] temp = packet.getPacket();
 		String outPut = Util.bytesToHexString(temp, temp.length);
-		Log.d(TAG, "sendFrameEnd, data:" + temp.length + ", it is:" + outPut);
+		//Log.d(TAG, "sendFrameEnd, data:" + temp.length + ", it is:" + outPut);
 	}
 }
 

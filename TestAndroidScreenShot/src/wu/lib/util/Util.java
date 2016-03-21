@@ -10,9 +10,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Locale;
+
+import org.apache.http.conn.util.InetAddressUtils;
 
 import ShellUtils.ShellUtils;
 import android.annotation.SuppressLint;
@@ -44,10 +50,19 @@ public class Util {
 	private static int width = 0;  // bitmap 的宽度
 	private static int screenHeight = 0; // 屏幕的高度
 	private static int screenWidth = 0;  // 屏幕的宽度
-	private static int min_x = 100;
-	private static int max_x = 400;
-	private static int min_y = 500;
-	private static int max_y = 1000;
+	/*
+	 * 从屏幕中心点向x，y进行扩展。扩展宽度为ex_width, 扩展高度为ex_height.（注意这个是一个扩展方向）
+	 */
+	private static int center_x = 0;
+	private static int center_y = 0;
+	//private static int ex_width = 335;
+	//private static int ex_height = 200;
+	private static int ex_width = 350;
+	private static int ex_height = 200;
+	private static int min_x = 0;
+	private static int max_x = 0;
+	private static int min_y = 0;
+	private static int max_y = 0;
 	private static int deepth = 0;
 	final static String FB0FILE1 = "/dev/graphics/fb0";
 	final static String OUTFILE = "/storage/sdcard1/my/test.jpg";
@@ -56,8 +71,10 @@ public class Util {
 	static DataInputStream dStream=null;
 	static byte[] piex=null;
 	static int colorSize = 0;
-	static int offset = 8; //xiaomi
-	
+	static int offset = 16; //xiaomi
+	static boolean bRotate = false;
+	//static int offset = 8; //meizu
+	//static boolean bRotate = true;
 	/**
 	 * 测试截图
 	 */
@@ -148,12 +165,18 @@ public class Util {
 		WindowManager WM = (WindowManager) activity.getSystemService(Context.WINDOW_SERVICE);
 		Display display = WM.getDefaultDisplay();
 		display.getMetrics(metrics);
-
-		width = max_x - min_x;
-		height = max_y - min_y;	
+		center_x = metrics.widthPixels / 2;
+		center_y = metrics.heightPixels / 2;
+		max_x = center_x + ex_width;
+		min_x = center_x - ex_width;
+		max_y = center_y + ex_height;
+		min_y = center_y - ex_height;
+		width = 2 * ex_width;
+		height = 2 * ex_height;	
 
 		Log.d(TAG, "screen's width:" + metrics.widthPixels + ",height:" + metrics.heightPixels);
 		Log.d(TAG, "bitmap's width:" + width + ", height:" + height);
+		Log.d(TAG, "min_x:" + min_x + ", max_x:" + max_x + ", min_y:" + min_y + ", max_y:" + max_y);
 		
 		PixelFormat localPixelFormat1 = new PixelFormat();
 
@@ -187,7 +210,7 @@ public class Util {
 		// 获取屏幕大小：
 		// 获取显示方式
 		
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 		
 		try {
 			graphics = new FileInputStream(fbFile);
@@ -207,14 +230,20 @@ public class Util {
 				int g = (piex[(m * screenWidth + n) *4 + 1] & 0xFF);
 				int b = (piex[(m * screenWidth + n) *4 + 2] & 0xFF);
 				int a = (piex[(m * screenWidth + n) *4 + 3] & 0xFF);
-				colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
+				if (bRotate) {
+					colors[(screenHeight - 1 -m )* screenWidth + ( screenWidth - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
+				} else {
+					colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
+					
+				}
+				
 				//colors[(screenHeight - 1 -m )* screenWidth + ( screenWidth - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
 			}
 		}
 		// 保存图片
 		// piex生成Bitmap
-		long end = System.currentTimeMillis();
-		Log.i(TAG, " shot screen time cost:" + (end - start));
+		//long end = System.currentTimeMillis();
+		//Log.i(TAG, " shot screen time cost:" + (end - start));
 		return Bitmap.createBitmap(colors, (screenWidth ), screenHeight,
 				Bitmap.Config.ARGB_8888);
 	}
@@ -236,7 +265,7 @@ public class Util {
 		// 获取屏幕大小：
 		// 获取显示方式
 		
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 		
 		try {
 			graphics = new FileInputStream(fbFile);
@@ -268,7 +297,13 @@ public class Util {
 				int b = (piex[(m * screenWidth + n) *4 + 2] & 0xFF);
 				int a = (piex[(m * screenWidth + n) *4 + 3] & 0xFF);
 				//colors[m* screenWidth + n] = (a << 24) + (r << 16) + (g << 8) + b;
-				colors[(m - min_y) * width + (n - min_x)] = (a << 24) + (r << 16) + (g << 8) + b;
+				if(bRotate) {
+					colors[(max_y - 1 -m )* width + ( max_x - 1 - n)] = (a << 24) + (r << 16) + (g << 8) + b;
+				} else {
+					colors[(m - min_y) * width + (n - min_x)] = (a << 24) + (r << 16) + (g << 8) + b;
+				}
+				
+				
 			}
 		}
 //		for (int m = 0; m < colors.length; m++) {
@@ -280,8 +315,8 @@ public class Util {
 //		}
 		// 保存图片
 		// piex生成Bitmap
-		long end = System.currentTimeMillis();
-		Log.i(TAG, " shot screen time cost:" + (end - start));
+		//long end = System.currentTimeMillis();
+		//Log.i(TAG, " shot screen time cost:" + (end - start));
 		return Bitmap.createBitmap(colors, (width ), height,
 				Bitmap.Config.ARGB_8888);
 	}
@@ -361,4 +396,87 @@ public class Util {
 
 			return stringBuilder.toString();  
 		}  
+	 
+	public static String getLocalHostIp() {
+	        String ipaddress = "";
+	        try {
+	            Enumeration<NetworkInterface> en = NetworkInterface
+	                    .getNetworkInterfaces();
+	            // 遍历所用的网络接口
+	            while (en.hasMoreElements()) {
+	                NetworkInterface nif = en.nextElement();// 得到每一个网络接口绑定的所有ip
+	                Enumeration<InetAddress> inet = nif.getInetAddresses();
+	                // 遍历每一个接口绑定的所有ip
+	                while (inet.hasMoreElements()) {
+	                    InetAddress ip = inet.nextElement();
+	                    if (!ip.isLoopbackAddress()
+	                            && InetAddressUtils.isIPv4Address(ip
+	                            .getHostAddress())) {
+	                        return ip.getHostAddress();
+	                    }
+	                }
+	            }
+	        }
+	        catch(SocketException e)
+	        {
+	            Log.e(TAG, "获取本地ip地址失败");
+	            e.printStackTrace();
+	        }
+	        return ipaddress;
+	    }
+	
+	public static byte[] convertIpTobytes(String strIp) {
+		if (strIp == null) {
+			return null;
+		}
+		byte[] ip = new byte[4];
+		String [] ipb=strIp.split("\\.");
+		ip[0]=(byte)Integer.parseInt(ipb[0]);
+		ip[1] = (byte)Integer.parseInt(ipb[1]);
+		ip[2] = (byte)Integer.parseInt(ipb[2]);
+		ip[3] = (byte)Integer.parseInt(ipb[3]);
+		
+//		ip[3]=(byte)Integer.parseInt(ipb[0]);
+//		ip[2] = (byte)Integer.parseInt(ipb[1]);
+//		ip[1] = (byte)Integer.parseInt(ipb[2]);
+//		ip[0] = (byte)Integer.parseInt(ipb[3]);
+		return ip;
+
+	}
+	
+	public static String modifyIP(String strIp) {
+		if (strIp == null) {
+			return null;
+		}
+		byte[] ip = new byte[4];
+		String [] ipb=strIp.split("\\.");
+		ip[0]=(byte)Integer.parseInt(ipb[0]);
+		ip[1] = (byte)Integer.parseInt(ipb[1]);
+		ip[2] = (byte)Integer.parseInt(ipb[2]);
+		//ip[3] = (byte)Integer.parseInt(ipb[3]);
+		ip[3] = (byte)255;
+		
+		StringBuilder stringBuilder = new StringBuilder("");  
+		if (ip == null || ip.length <= 0) { 
+			
+			return null;  
+		}  
+		for (int i = 0; i < ip.length; i++) {  
+			int v = ip[i] & 0xFF;  
+			String hv = Integer.toString(v); 
+			
+//			if (hv.length() < 2) {  
+//				stringBuilder.append(0);  
+//			}  			
+			if ( i != 0) {
+				stringBuilder.append("."); 
+			}
+			stringBuilder.append(hv); 
+			
+
+		}  
+
+		return stringBuilder.toString();  
+	}
+	
 }

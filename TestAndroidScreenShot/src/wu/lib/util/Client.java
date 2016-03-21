@@ -251,7 +251,7 @@ public class Client {
 					Packet item;
 					while(null!=(item=requestQueen.poll()))
 					{
-						//Log.d(TAG, "send data,LEN:"+ item.getPacket().length);
+						Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
 						outStream.write(item.getPacket());
 						outStream.flush();
 						item=null;
@@ -309,7 +309,7 @@ public class Client {
 						offset+=read;
 						length=5-offset;
 					}
-
+					Log.v(TAG,"Rec :Close....");
 					reconn();//走到这一步，说明服务器socket断了
 					break;
 				}

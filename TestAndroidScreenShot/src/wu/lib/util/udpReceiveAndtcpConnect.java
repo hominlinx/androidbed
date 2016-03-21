@@ -63,7 +63,7 @@ public class udpReceiveAndtcpConnect extends Thread {
 			if (dp.getAddress() != null) {
 				final String quest_ip = dp.getAddress().toString();
 
-				String host_ip = getLocalHostIp();
+				String host_ip = Util.getLocalHostIp(); 
 
 				System.out.println("host_ip:  --------------------  " + host_ip);
 				System.out.println("quest_ip: --------------------++++  " + quest_ip);
@@ -107,34 +107,6 @@ public class udpReceiveAndtcpConnect extends Thread {
 	}
 	
 	
-	private String getLocalHostIp() {
-        String ipaddress = "";
-        try {
-            Enumeration<NetworkInterface> en = NetworkInterface
-                    .getNetworkInterfaces();
-            // 遍历所用的网络接口
-            while (en.hasMoreElements()) {
-                NetworkInterface nif = en.nextElement();// 得到每一个网络接口绑定的所有ip
-                Enumeration<InetAddress> inet = nif.getInetAddresses();
-                // 遍历每一个接口绑定的所有ip
-                while (inet.hasMoreElements()) {
-                    InetAddress ip = inet.nextElement();
-                    if (!ip.isLoopbackAddress()
-                            && InetAddressUtils.isIPv4Address(ip
-                            .getHostAddress())) {
-                        return ip.getHostAddress();
-                    }
-                }
-            }
-        }
-        catch(SocketException e)
-        {
-            Log.e(TAG, "获取本地ip地址失败");
-            e.printStackTrace();
-        }
-        return ipaddress;
-    }
-	
 	/*
 	 * 检测接收UDP数据的合理性。
 	 * 接收数据：2Byte(00 02) 4Byte( IP 地址的 16 进制表示) 1Byte( 00--Ready（or 01--Busy）)
@@ -162,7 +134,7 @@ public class udpReceiveAndtcpConnect extends Thread {
 		byte[] validData = new byte[7];
 		validData[0] = 0x00;
 		validData[1] = 0x02;
-		byte[] ip = convertIpTobytes(strIp);
+		byte[] ip = Util.convertIpTobytes(strIp);
 		if (ip.length != 4) {
 			return null;
 		}
@@ -173,22 +145,5 @@ public class udpReceiveAndtcpConnect extends Thread {
 
 		return Util.bytesToHexString(validData, validData.length);
 	}
-	public static byte[] convertIpTobytes(String strIp) {
-		if (strIp == null) {
-			return null;
-		}
-		byte[] ip = new byte[4];
-		String [] ipb=strIp.split("\\.");
-		ip[0]=(byte)Integer.parseInt(ipb[0]);
-		ip[1] = (byte)Integer.parseInt(ipb[1]);
-		ip[2] = (byte)Integer.parseInt(ipb[2]);
-		ip[3] = (byte)Integer.parseInt(ipb[3]);
-		
-//		ip[3]=(byte)Integer.parseInt(ipb[0]);
-//		ip[2] = (byte)Integer.parseInt(ipb[1]);
-//		ip[1] = (byte)Integer.parseInt(ipb[2]);
-//		ip[0] = (byte)Integer.parseInt(ipb[3]);
-		return ip;
-
-	}
+	
 }

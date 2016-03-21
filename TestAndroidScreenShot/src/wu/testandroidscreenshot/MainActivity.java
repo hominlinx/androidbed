@@ -110,7 +110,7 @@ public class MainActivity extends Activity  implements OnClickListener {
 //		port.setText("60000");
 		
 		Util.initScreen(this);
-		mScreenshotThread = new ScreenshotThread();	
+		
 		//Util.testShot();
 	}
 	
@@ -242,20 +242,21 @@ public class MainActivity extends Activity  implements OnClickListener {
 			Log.d(TAG, "stop");
 			break;
 		case R.id.testStart:
-			//mScreenshotThread = new ScreenshotThread();
-			//mScreenshotThread.start();
+			mScreenshotThread = new ScreenshotThread();
+			screenshotQuit = false;
+			mScreenshotThread.start();
 			
-			Intent startIntent1 = new Intent(this, ScreenTestService.class);  
-			startService(startIntent1); 
+//			Intent startIntent1 = new Intent(this, ScreenTestService.class);  
+//			startService(startIntent1); 
 			
 			startTest.setEnabled(false);
 			stopTest.setEnabled(true);
 			Log.d(TAG, "testStart");
 			break;
 		case R.id.testStop:
-			//screenshotQuit = true;
-			Intent stopIntent1 = new Intent(this, ScreenTestService.class);  
-			stopService(stopIntent1); 
+			screenshotQuit = true;
+//			Intent stopIntent1 = new Intent(this, ScreenTestService.class);  
+//			stopService(stopIntent1); 
 			
 			startTest.setEnabled(true);
 			stopTest.setEnabled(false);
@@ -278,7 +279,8 @@ public class MainActivity extends Activity  implements OnClickListener {
 		public void run() {
 			Log.d(TAG, "ScreenshotThread thread run");
 			
-			while (!screenshotQuit) {				
+			while (!screenshotQuit) {	
+				Log.d(TAG, "Util  testShot");
 				Util.testShot();			
 				try {
 					Thread.sleep(1000);

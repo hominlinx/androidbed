@@ -19,6 +19,9 @@ public class udpBroadCast extends Thread {
 	public boolean quitFlag = false;
 	@Override
 	public void run() {
+		String host_ip = Util.modifyIP(Util.getLocalHostIp()); 
+		Log.d(TAG, "ip:" + host_ip);
+		
 		while(!quitFlag) {
 			try {  
                 Thread.sleep(1000);  
@@ -26,8 +29,12 @@ public class udpBroadCast extends Thread {
                 e.printStackTrace();  
             }  
 			try {
+				
 				DatagramSocket dgSocket=new DatagramSocket(); 
-				DatagramPacket dgPacket=new DatagramPacket(data,data.length,InetAddress.getByName("255.255.255.255"),PORT);
+				
+				DatagramPacket dgPacket=new DatagramPacket(data,data.length,InetAddress.getByName(host_ip),PORT);
+				//DatagramPacket dgPacket=new DatagramPacket(data,data.length,InetAddress.getByName("255.255.255.255"),PORT);
+				
 				dgSocket.send(dgPacket);  
 	            dgSocket.close();  
 	            Log.d(TAG, "udp broadcast ok....");
