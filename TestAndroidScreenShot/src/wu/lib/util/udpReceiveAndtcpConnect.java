@@ -65,10 +65,7 @@ public class udpReceiveAndtcpConnect extends Thread {
 
 				String host_ip = Util.getLocalHostIp(); 
 
-				System.out.println("host_ip:  --------------------  " + host_ip);
-				System.out.println("quest_ip: --------------------++++  " + quest_ip);
-				System.out.println("quest_ip: --------------------  " + quest_ip.substring(1));
-
+				
 				
 				/* 若udp包的ip地址 是 本机的ip地址的话，丢掉这个包(不处理)*/
 
@@ -76,11 +73,17 @@ public class udpReceiveAndtcpConnect extends Thread {
 					continue;
 				}
 
+				System.out.println("host_ip:  --------------------  " + host_ip);
+				System.out.println("quest_ip: --------------------++++  " + quest_ip);
+				System.out.println("quest_ip: --------------------  " + quest_ip.substring(1));
+
 				Log.d(TAG, "hostip:" + host_ip + ",questip:" + quest_ip.substring(1));
 				
-				boolean ret = checkRecvData(data, quest_ip.substring(1), dp.getLength());
+				//boolean ret = checkRecvData(data, quest_ip.substring(1), dp.getLength());
+				boolean ret = true; //FIXME
 				if (ret) { // get valid UDP...
 					user.open(quest_ip.substring(1), 32550); //tcp connect...
+					
 					while(user.isNeedConn()) {
 						Log.d(TAG, "tcp need connect....");
 						

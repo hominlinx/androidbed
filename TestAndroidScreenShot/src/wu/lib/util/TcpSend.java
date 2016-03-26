@@ -1,6 +1,9 @@
 package wu.lib.util;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -19,8 +22,10 @@ public class TcpSend extends Thread{
 	private boolean quitFlag = false;
 	Client user;
 	private static int PACKSIZE = 2048;
+	private static int INTERVAL = 250;
 	public void stopTcp() {
 		quitFlag = true;
+		user.close();
 	}
 	
 	public TcpSend(Client user) {
@@ -32,6 +37,10 @@ public class TcpSend extends Thread{
 		while (!quitFlag) {
 			long start = System.currentTimeMillis();
 			byte[] buf = getShot();
+			
+			///////////////////////////////////
+			//save2File(buf);
+			///////////////////////////////////
 			sendFrameStart(buf.length);
 			
 			sendFrameData(buf);
@@ -43,8 +52,8 @@ public class TcpSend extends Thread{
 			//sendImage();
 			try {
 				long temp = end1 - start;
-				if ( temp < 250) {
-					Thread.sleep(250 - temp);
+				if ( temp < INTERVAL) {
+					Thread.sleep(INTERVAL - temp);
 				}
 				//Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -88,6 +97,25 @@ public class TcpSend extends Thread{
 		return buf;
 	}
 	
+	private void save2File(byte[] buf)
+	{
+		SimpleDateFormat sdf = new SimpleDateFormat(
+				"yyyy-MM-dd_HH-mm-ss", Locale.US); 
+		//String outname = "/storage/sdcard1/my/" + sdf.format(new Date()) + ".jpg";
+		String outname = "/storage/sdcard1/my/test"+ ".jpg";
+		File f = new File(outname);
+		try {
+			f.createNewFile();
+			FileOutputStream fOut = new FileOutputStream(f);
+			fOut.write(buf);
+			fOut.flush();
+			fOut.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	/*
 	 * 
 	 * Type(2 Bytes):00 03
@@ -111,22 +139,37 @@ public class TcpSend extends Thread{
 	}
 	
 	private void sendFrameData(byte[] buf) {
+	
 		int len = buf.length;
 		int cnt = len / PACKSIZE;
 		for(int i = 0; i < cnt; ++i) {
-			byte[] tmpBuf = new byte[PACKSIZE];
-			System.arraycopy(buf, i*PACKSIZE, tmpBuf, 0, PACKSIZE);
+			byte[] tmpBuf = new byte[PACKSIZE + 6];
+			tmpBuf[0] = 0x00;
+			tmpBuf[1] = 0x04;
+			tmpBuf[2] = (byte) (PACKSIZE >> 24 & 0xff);
+			tmpBuf[3] = (byte) (PACKSIZE >> 16 & 0xff);
+			tmpBuf[4] = (byte) (PACKSIZE >> 8 & 0xff);
+			tmpBuf[5] = (byte) (PACKSIZE & 0xff);
+			
+			System.arraycopy(buf, i*PACKSIZE, tmpBuf, 6, PACKSIZE);
 			Packet packet = new Packet();
 			packet.pack(tmpBuf);
 			user.send(packet);	
-			byte[] temp = packet.getPacket();
+			//byte[] temp = packet.getPacket();
 			//String outPut = Util.bytesToHexString(temp, temp.length);
 			//Log.d(TAG, "sendFrameData, AAAAAA:" + temp.length);
 		}
 		int rest = len % PACKSIZE;
 		if (rest > 0) {
-			byte[] restBuf = new byte[rest];
-			System.arraycopy(buf, cnt*PACKSIZE, restBuf, 0, rest);
+			byte[] restBuf = new byte[rest + 6];
+			restBuf[0] = 0x00;
+			restBuf[1] = 0x04;
+			restBuf[2] = (byte) (rest >> 24 & 0xff);
+			restBuf[3] = (byte) (rest >> 16 & 0xff);
+			restBuf[4] = (byte) (rest >> 8 & 0xff);
+			restBuf[5] = (byte) (rest & 0xff);
+			
+			System.arraycopy(buf, cnt*PACKSIZE, restBuf, 6, rest);
 			Packet packet = new Packet();
 			packet.pack(restBuf);
 			user.send(packet);

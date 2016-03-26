@@ -57,8 +57,10 @@ public class Util {
 	private static int center_y = 0;
 	//private static int ex_width = 335;
 	//private static int ex_height = 200;
+	//private static int ex_width = 350;
+	//private static int ex_height = 200;
 	private static int ex_width = 350;
-	private static int ex_height = 200;
+	private static int ex_height = 400;
 	private static int min_x = 0;
 	private static int max_x = 0;
 	private static int min_y = 0;

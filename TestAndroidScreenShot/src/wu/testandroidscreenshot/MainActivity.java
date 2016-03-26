@@ -207,6 +207,7 @@ public class MainActivity extends Activity  implements OnClickListener {
 
 	udpBroadCast udp = null;
 	public void startUDP() {
+		Log.d(TAG, "startUDPPPPPPPPPPPPPPPP");
 		if(udp != null) {
 			udp.start();
 		}

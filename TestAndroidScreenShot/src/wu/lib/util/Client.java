@@ -251,7 +251,7 @@ public class Client {
 					Packet item;
 					while(null!=(item=requestQueen.poll()))
 					{
-						Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
+						//Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
 						outStream.write(item.getPacket());
 						outStream.flush();
 						item=null;
