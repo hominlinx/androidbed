@@ -6,5 +6,6 @@ package com.autoio.lib.net;
 *
 */
 public interface ISocketResponse {
-	public abstract void onSocketResponse(String txt);
+	//public abstract void onSocketResponse(String txt);
+	public abstract void onSocketResponse(byte[] txt, int len);
 }

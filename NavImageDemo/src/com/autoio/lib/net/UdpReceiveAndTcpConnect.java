@@ -82,8 +82,8 @@ public class UdpReceiveAndTcpConnect extends Thread {
 
 				Log.d(TAG, "hostip:" + host_ip + ",questip:" + quest_ip.substring(1));
 
-				//boolean ret = checkRecvData(data, quest_ip.substring(1), dp.getLength());
-				boolean ret = true; //FIXME
+				boolean ret = checkRecvData(data, quest_ip.substring(1), dp.getLength());
+				//boolean ret = true; //FIXME
 				if (ret) { // get valid UDP...
 					user.open(quest_ip.substring(1), 32550); //tcp connect...
 
@@ -115,12 +115,14 @@ public class UdpReceiveAndTcpConnect extends Thread {
 	 */
 	private boolean checkRecvData(byte[] data, String ip, int len) {
 
-		if ( data.length < 7 || len != 7) {
+		if ( data.length < 9 || len != 9) {
 			Log.d(TAG, "udp data's len is " + len + ", ERROR");
 			return false;
 		}
+
 		// 将data组合为string
 		String str = Util.bytesToHexString(data, len);
+		
 		//
 		String validStr = getValidData(ip);
 		Log.d(TAG, "checkRecvData getData:" + str + ",validStr:" + validStr);
@@ -133,17 +135,19 @@ public class UdpReceiveAndTcpConnect extends Thread {
 
 
 	public static String getValidData(String strIp) {
-		byte[] validData = new byte[7];
+		byte[] validData = new byte[9];
 		validData[0] = 0x00;
 		validData[1] = 0x02;
+		validData[2] = 0x06;
 		byte[] ip = Util.convertIpTobytes(strIp);
 		if (ip.length != 4) {
 			return null;
 		}
 		for (int i = 0; i < 4; ++i) {
-			validData[2+i] = ip[i];
+			validData[3+i] = ip[i];
 		}
-		validData[6] = 0x00;
+		validData[7] = 0x00;
+		validData[8] = 0x01;
 
 		return Util.bytesToHexString(validData, validData.length);
 	}

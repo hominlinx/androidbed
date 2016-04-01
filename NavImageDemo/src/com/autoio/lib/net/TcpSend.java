@@ -63,7 +63,7 @@ public class TcpSend extends Thread {
 				e.printStackTrace();
 			}
 			long end = System.currentTimeMillis();
-			Log.i(TAG, "time cost:" + (end - start));
+			//Log.i(TAG, "time cost:" + (end - start));
 		}
 	}
 	
@@ -79,7 +79,7 @@ public class TcpSend extends Thread {
 				bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);  
 	
 			buf=baos.toByteArray();
-			Log.d(TAG, "buf size::" + buf.length + ",cnt:" + baos.size());
+			//Log.d(TAG, "buf size::" + buf.length + ",cnt:" + baos.size());
 			}finally{  
 				try {  
 					if(baos != null)  

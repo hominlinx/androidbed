@@ -34,7 +34,7 @@ public class UdpBroadCast extends Thread {
 
 				DatagramSocket dgSocket=new DatagramSocket(); 
 
-				//DatagramPacket dgPacket=new DatagramPacket(data,data.length,InetAddress.getByName(host_ip),PORT);
+				//DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName(host_ip),PORT);
 				DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName("255.255.255.255"),PORT);
 
 

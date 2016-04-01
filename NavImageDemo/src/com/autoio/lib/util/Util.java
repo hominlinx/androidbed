@@ -67,10 +67,10 @@ public class Util {
 	static DataInputStream dStream=null;
 	static byte[] piex=null;
 	static int colorSize = 0;
-	static int offset = 16; //xiaomi
-	static boolean bRotate = false;
-	//static int offset = 8; //meizu
-	//static boolean bRotate = true;
+	//static int offset = 16; //xiaomi
+	//static boolean bRotate = false;
+	static int offset = 8; //meizu
+	static boolean bRotate = true;
 
 	/**
 	 * 测试截图
@@ -250,6 +250,9 @@ public class Util {
 
 		//long start = System.currentTimeMillis();
 
+		////
+		
+		////
 		try {
 			graphics = new FileInputStream(fbFile);
 		} catch (FileNotFoundException e) {
@@ -304,6 +307,21 @@ public class Util {
 				Bitmap.Config.ARGB_8888);
 	}
 
+	public static void setWidthAndHeight(int w, int h)
+	{
+		max_x = center_x + w/2;
+		min_x = center_x - w/2;
+		max_y = center_y + h/2;
+		min_y = center_y - h/2;
+		width =  w;
+		height =  h;
+		colorSize = width * height;
+
+		Log.d(TAG, "setWidthAndHeight, w:" + w + ", h:" + h);
+		Log.d(TAG, "bitmap's width:" + width + ", height:" + height);
+		Log.d(TAG, "min_x:" + min_x + ", max_x:" + max_x + ", min_y:" + min_y + ", max_y:" + max_y);
+	}
+	
 	public void screenShot(String path){
 		Process process = null;
 		try{
@@ -358,7 +376,33 @@ public class Util {
 		b[0] = (byte) (n >> 24 & 0xff);
 		return b;
 	}
+	
+	 /** 
+     * 通过byte数组取到short 
+     *  
+     * @param b 
+     * @param index 
+     *            第几位开始取 
+     * @return 
+     */  
+    public static short getShort(byte[] b, int index) {  
+    	
+        return (short) (((b[index + 0] << 8) | b[index + 1] & 0xff));  
+    }  
 
+    public static byte[] strTobytes(String str, int len) {
+    	if (str.length() != 2 * len) {
+    		return null;
+    	}
+    	byte[] t = str.getBytes();
+    	byte[] temp = new byte[len];
+    	for(int i = 0; i < len; ++i) {
+    		//temp[i] = (((str[i + 0] << 8) | str[i + 1] & 0xff)); 
+    		temp[i] = (byte) (((t[i] << 8) | (t[i + 1] & 0xff)));
+    	}
+
+    	return temp;
+    }
 
 	public static String bytesToHexString(byte[] src, int len){  
 		StringBuilder stringBuilder = new StringBuilder("");  

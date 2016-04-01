@@ -9,6 +9,7 @@ package com.example.navimagedemo;
 
 import com.autoio.lib.net.Client;
 import com.autoio.lib.net.ISocketResponse;
+import com.autoio.lib.net.TcpResponse;
 import com.autoio.lib.net.UdpBroadCast;
 import com.autoio.lib.util.Util;
 
@@ -29,6 +30,7 @@ public class MainActivity extends Activity implements OnClickListener  {
     Button stopService;
     Button startTest;
     Button stopTest;
+    TcpResponse socketListener =  null;
     
     private Client user=null;
 	UdpBroadCast udp = null;
@@ -58,6 +60,7 @@ public class MainActivity extends Activity implements OnClickListener  {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		socketListener = new TcpResponse();
 		user=new Client(this.getApplicationContext(),socketListener);
 
 		Util.initScreen(this);
@@ -88,17 +91,17 @@ public class MainActivity extends Activity implements OnClickListener  {
 	}
 
 	
-	private ISocketResponse socketListener=new ISocketResponse() {
-
-		@Override
-		public void onSocketResponse(final String txt) {
-			runOnUiThread(new Runnable() {
-				public void run() {
-					
-				}
-			});
-		}
-	};
+//	private ISocketResponse socketListener=new ISocketResponse() {
+//
+//		@Override
+//		public void onSocketResponse(final String txt) {
+//			runOnUiThread(new Runnable() {
+//				public void run() {
+//					Log.d(TAG, "++++++++++++++++++++++=" + txt.length());
+//				}
+//			});
+//		}
+//	};
 	
 	@Override
 	public void onClick(View v) {

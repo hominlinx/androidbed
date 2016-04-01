@@ -285,32 +285,73 @@ public class Client {
 			try {
 				while(state!=STATE_CLOSE&&state==STATE_CONNECT_SUCCESS&&null!=inStream)
 				{
-					Log.v(TAG,"Rec :---------");
-					byte[] bodyBytes=new byte[5];
+//					Log.v(TAG,"Rec :---------====================");
+//					int CC = 1;
+//					byte[] bodyBytes=new byte[CC];
+//					int offset=0;
+//					int length=CC;
+//					int read=0;
+//
+//					while((read=inStream.read(bodyBytes, offset, length))>0)
+//					{
+//						if(length-read==0)
+//						{
+//							Log.v(TAG,"Rec : ==========" + read + "," + (int)(bodyBytes[0] & 0xFF));
+//							if(null!=respListener)
+//							{
+//								respListener.onSocketResponse(new String(bodyBytes));
+//							}
+//
+//							offset=0;
+//							length= CC;
+//							read=0;
+//							Log.v(TAG,"Rec : len:xxxx" + read + "," + (int)(bodyBytes[0] & 0xFF));
+//							continue;
+//						}
+//						offset+=read;
+//						length=CC -offset;
+//						Log.v(TAG,"Rec : len:" + read + "," + (int)(bodyBytes[0] & 0xFF));
+//					}
+//					Log.v(TAG,"Rec :Close....");
+//					reconn();//走到这一步，说明服务器socket断了
+//					break;
+//					
+					Log.v(TAG,"Rec :---------====================");
+					int CC = 10;
+					byte[] bodyBytes=new byte[CC];
+					
 					int offset=0;
-					int length=5;
+					int length=CC;
 					int read=0;
 
 					while((read=inStream.read(bodyBytes, offset, length))>0)
 					{
 						if(length-read==0)
 						{
+							Log.v(TAG,"Rec : ==========" + read + "," + (int)(bodyBytes[0] & 0xFF));
 							if(null!=respListener)
 							{
-								respListener.onSocketResponse(new String(bodyBytes));
+								respListener.onSocketResponse(bodyBytes, read);
 							}
 
 							offset=0;
-							length=5;
+							length= CC;
 							read=0;
+							Log.v(TAG,"Rec : len:xxxx" + read + "," + (int)(bodyBytes[0] & 0xFF));
 							continue;
 						}
 						offset+=read;
-						length=5-offset;
+						length=CC -offset;
+//						if(null!=respListener)
+//						{
+//							respListener.onSocketResponse(bodyBytes, read);
+//						}
+						Log.v(TAG,"Rec : len:" + read + "," + (int)(bodyBytes[0] & 0xFF));
 					}
 					Log.v(TAG,"Rec :Close....");
 					reconn();//走到这一步，说明服务器socket断了
 					break;
+					
 				}
 			}
 			catch(SocketException e1) 
@@ -325,4 +366,53 @@ public class Client {
 			Log.v(TAG,"Rec :End");
 		}
 	}
+//	private class Rec implements Runnable
+//	{
+//		public void run() {
+//Log.v(TAG,"Rec :Start");
+//			
+//			try {
+//					while(state!=STATE_CLOSE&&state==STATE_CONNECT_SUCCESS&&null!=inStream)
+//					{
+//Log.v(TAG,"Rec :---------");
+//							byte[] bodyBytes=new byte[5];
+//							int offset=0;
+//							int length=5;
+//							int read=0;
+//							
+//							while((read=inStream.read(bodyBytes, offset, length))>0)
+//							{
+//								if(length-read==0)
+//								{
+//									if(null!=respListener)
+//									{
+//										respListener.onSocketResponse(new String(bodyBytes));
+//									}
+//									
+//									offset=0;
+//									length=5;
+//									read=0;
+//									continue;
+//								}
+//								offset+=read;
+//								length=5-offset;
+//								Log.v(TAG,"Rec : len:" + read + "," + (int)(bodyBytes[3] & 0xFF));
+//							}
+//							
+//							reconn();//走到这一步，说明服务器socket断了
+//							break;
+//					}
+//			}
+//			catch(SocketException e1) 
+//			{
+//				e1.printStackTrace();//客户端主动socket.close()会调用这里 java.net.SocketException: Socket closed
+//			} 
+//			catch (Exception e2) {
+//Log.v(TAG,"Rec :Exception");
+//				e2.printStackTrace();
+//			}
+//			
+//Log.v(TAG,"Rec :End");
+//		}
+//	}
 }
