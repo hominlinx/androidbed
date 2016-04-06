@@ -12,6 +12,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
@@ -81,7 +82,8 @@ public class Util {
 
 		SimpleDateFormat sdf = new SimpleDateFormat(
 				"yyyy-MM-dd_HH-mm-ss", Locale.US); 
-		String outname = "/storage/sdcard1/my/" + sdf.format(new Date()) + ".jpg";
+		//String outname = "/storage/sdcard1/my/" + sdf.format(new Date()) + ".jpg";
+		String outname = "/sdcard/my/" + sdf.format(new Date()) + ".jpg";
 
 		try {
 			Bitmap bm = getScreenBitmap();
@@ -105,6 +107,7 @@ public class Util {
 		long start = System.currentTimeMillis();
 
 		//	Bitmap b = rotate(bitmap, 180);
+		Log.d(TAG, "saveMyBitmap,name:" + bitName);
 		File f = new File(bitName);
 		f.createNewFile();
 		FileOutputStream fOut = new FileOutputStream(f);
@@ -156,6 +159,7 @@ public class Util {
 		min_y = center_y - ex_height;
 		width = 2 * ex_width;
 		height = 2 * ex_height;	
+		
 
 		Log.d(TAG, "screen's width:" + metrics.widthPixels + ",height:" + metrics.heightPixels);
 		Log.d(TAG, "bitmap's width:" + width + ", height:" + height);
@@ -171,7 +175,8 @@ public class Util {
 		Log.d(TAG, "screen's pixelformat:" + pixelformat + ",deepth:" + deepth);
 		screenHeight = metrics.heightPixels;
 		screenWidth = metrics.widthPixels + offset;
-
+	
+		Log.d(TAG, "real screen's width:" + screenWidth + ",height:" + screenHeight + "," + localPixelFormat1.bitsPerPixel);
 		colorSize = width * height;
 
 		piex = new byte[screenHeight *  screenWidth * deepth]; // Just for meizu-note3
@@ -309,14 +314,34 @@ public class Util {
 
 	public static void setWidthAndHeight(int w, int h)
 	{
+		Log.d(TAG, "setWidthAndHeight, w:" + w + ", h:" + h + "ww:" + screenWidth + ",hh" + screenHeight);
+		if (w >= screenWidth) {
+			w = screenWidth;
+		}
+		if (h >= screenHeight) {
+			h = screenHeight;
+		}
 		max_x = center_x + w/2;
 		min_x = center_x - w/2;
 		max_y = center_y + h/2;
 		min_y = center_y - h/2;
+		
 		width =  w;
 		height =  h;
+		if (min_x < 0) {
+			min_x = 0;
+		}
+		if (max_x > screenWidth) {
+			max_x = screenWidth;
+		}
+		if (min_y < 0) {
+			min_y = 0;
+		}
+		if (max_y > screenHeight) {
+			max_y = screenHeight;
+		}
 		colorSize = width * height;
-
+		Log.d(TAG, "setWidthAndHeight, cx:" + center_x + ", cy:" + center_y);
 		Log.d(TAG, "setWidthAndHeight, w:" + w + ", h:" + h);
 		Log.d(TAG, "bitmap's width:" + width + ", height:" + height);
 		Log.d(TAG, "min_x:" + min_x + ", max_x:" + max_x + ", min_y:" + min_y + ", max_y:" + max_y);
@@ -388,6 +413,19 @@ public class Util {
     public static short getShort(byte[] b, int index) {  
     	
         return (short) (((b[index + 0] << 8) | b[index + 1] & 0xff));  
+    }  
+    
+    /** 
+     * 通过byte数组取到short 
+     *  
+     * @param b 
+     * @param index 
+     *            第几位开始取 
+     * @return 
+     */  
+    public static short getShort(ArrayList b, int index) {  
+    	
+        return (short) (((Byte)(b.get(index)) << 8) | ((Byte)(b.get(index + 1)) & 0xff));  
     }  
 
     public static byte[] strTobytes(String str, int len) {
