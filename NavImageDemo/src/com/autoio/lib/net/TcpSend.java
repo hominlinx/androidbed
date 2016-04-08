@@ -24,8 +24,8 @@ public class TcpSend extends Thread {
 	private static final String TAG = "Hominlinx===>TcpSend";
 	private boolean quitFlag = false;
 	Client user;
-	private static int PACKSIZE = 2048;
-	private static int INTERVAL = 250; // 250ms 发送一帧
+	private static int PACKSIZE = 204800;
+	private static int INTERVAL = 100; // 250ms 发送一帧
 	public void stopTcp() {
 		quitFlag = true;
 		user.close();
@@ -63,7 +63,7 @@ public class TcpSend extends Thread {
 				e.printStackTrace();
 			}
 			long end = System.currentTimeMillis();
-			//Log.i(TAG, "time cost:" + (end - start));
+			Log.i(TAG, "time cost:" + (end - start));
 		}
 	}
 	
@@ -135,6 +135,12 @@ public class TcpSend extends Thread {
 		
 		packet.pack(buf);
 		user.send(packet);
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		byte[] temp = packet.getPacket();
 		String outPut = Util.bytesToHexString(temp, temp.length);
 		//Log.d(TAG, "sendFrameStart, tempppp:" + temp.length + ", it is:" + outPut);
@@ -175,6 +181,12 @@ public class TcpSend extends Thread {
 			Packet packet = new Packet();
 			packet.pack(restBuf);
 			user.send(packet);
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		//Log.d(TAG, "sendFrameData, len:" + len + ",cnt:" + cnt + ",rest:" + rest);
 	}
@@ -184,7 +196,12 @@ public class TcpSend extends Thread {
 		Packet packet = new Packet();
 		packet.pack(frameEnddata);
 		user.send(packet);	
-		
+		try {
+			Thread.sleep(10);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		byte[] temp = packet.getPacket();
 		String outPut = Util.bytesToHexString(temp, temp.length);
 		//Log.d(TAG, "sendFrameEnd, data:" + temp.length + ", it is:" + outPut);

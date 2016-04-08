@@ -7,6 +7,7 @@ import java.net.InetAddress;
 import com.autoio.lib.util.Util;
 
 
+import android.content.Context;
 import android.util.Log;
 
 /**
@@ -19,9 +20,20 @@ public class UdpBroadCast extends Thread {
 	static byte[] dataV1 = { 0x00, 0x01, 0x01, 0x01 };
 	static int PORT = 10220;
 	public boolean quitFlag = false;
+	Context m_context;
+	public UdpBroadCast(Context context) {
+		m_context = context;
+	}
 	@Override
 	public void run() {
-		String host_ip = Util.modifyIP(Util.getLocalHostIp()); 
+		String host_ip = "";
+		if (Util.isApEnabled(m_context)) {
+			host_ip = "192.168.43.255";
+		} else {
+			host_ip = Util.modifyIP(Util.getLocalHostIp());
+		}
+		Log.d(TAG, "ap:" + Util.isApEnabled(m_context));
+		 
 		Log.d(TAG, "ip:" + host_ip);
 
 		while(!quitFlag) {

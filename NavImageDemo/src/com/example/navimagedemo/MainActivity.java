@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {  
 		case R.id.start:
-			udp = new UdpBroadCast();
+			udp = new UdpBroadCast(this);
 			startUDP();
 			Intent startIntent = new Intent(this, SendService.class);  
 			startService(startIntent); 

@@ -42,11 +42,16 @@ public class Client {
 	
 	public int send(Packet in)
 	{
-		requestQueen.add(in);
-		synchronized (lock) 
-		{
-			lock.notifyAll();
+		synchronized (lock) {
+			requestQueen.add(in);
+			Log.d(TAG, "XXsend, len:" + requestQueen.size());
 		}
+//		requestQueen.add(in);
+//		Log.d(TAG, "XXsend, len:" + requestQueen.size());
+//		synchronized (lock) 
+//		{
+//			lock.notifyAll();
+//		}
 		return in.getId();
 	}
 	
@@ -247,20 +252,30 @@ public class Client {
 			try {
 				while(state!=STATE_CLOSE&&state==STATE_CONNECT_SUCCESS&&null!=outStream)
 				{
-					Packet item;
-					while(null!=(item=requestQueen.poll()))
-					{
-						//Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
-						outStream.write(item.getPacket());
-						outStream.flush();
-						item=null;
+					synchronized(lock) {
+						Packet item;
+						while(null!=(item=requestQueen.poll()))
+						{
+							Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
+							outStream.write(item.getPacket());
+							outStream.flush();
+							item=null;
+						}
 					}
-
-					//Log.v(TAG,"Send :woken up AAAAAAAAA");
-					synchronized (lock)
-					{
-						lock.wait();
-					}
+//					Packet item;
+//					while(null!=(item=requestQueen.poll()))
+//					{
+//						Log.d(TAG, "send data,LEN:"+ item.getPacket().length + ",size:" + requestQueen.size());
+//						outStream.write(item.getPacket());
+//						outStream.flush();
+//						item=null;
+//					}
+//
+//					//Log.v(TAG,"Send :woken up AAAAAAAAA");
+//					synchronized (lock)
+//					{
+//						lock.wait();
+//					}
 					//Log.v(TAG,"Send :woken up BBBBBBBBBB");
 				}
 			}catch(SocketException e1) 
@@ -285,39 +300,7 @@ public class Client {
 			try {
 				while(state!=STATE_CLOSE&&state==STATE_CONNECT_SUCCESS&&null!=inStream)
 				{
-//					Log.v(TAG,"Rec :---------====================");
-//					int CC = 1;
-//					byte[] bodyBytes=new byte[CC];
-//					int offset=0;
-//					int length=CC;
-//					int read=0;
-//
-//					while((read=inStream.read(bodyBytes, offset, length))>0)
-//					{
-//						if(length-read==0)
-//						{
-//							Log.v(TAG,"Rec : ==========" + read + "," + (int)(bodyBytes[0] & 0xFF));
-//							if(null!=respListener)
-//							{
-//								respListener.onSocketResponse(new String(bodyBytes));
-//							}
-//
-//							offset=0;
-//							length= CC;
-//							read=0;
-//							Log.v(TAG,"Rec : len:xxxx" + read + "," + (int)(bodyBytes[0] & 0xFF));
-//							continue;
-//						}
-//						offset+=read;
-//						length=CC -offset;
-//						Log.v(TAG,"Rec : len:" + read + "," + (int)(bodyBytes[0] & 0xFF));
-//					}
-//					Log.v(TAG,"Rec :Close....");
-//					reconn();//走到这一步，说明服务器socket断了
-//					break;
-//					
-					Log.v(TAG,"Rec :---------====================");
-					int CC = 10;
+					int CC = 5;
 					byte[] bodyBytes=new byte[CC];
 					
 					int offset=0;
@@ -328,7 +311,7 @@ public class Client {
 					{
 						if(length-read==0)
 						{
-							Log.v(TAG,"Rec : ==========" + read + "," + (int)(bodyBytes[0] & 0xFF));
+							Log.v(TAG,"Rec : read len:" + read);
 							if(null!=respListener)
 							{
 								respListener.onSocketResponse(bodyBytes, read);
@@ -337,16 +320,16 @@ public class Client {
 							offset=0;
 							length= CC;
 							read=0;
-							Log.v(TAG,"Rec : len:xxxx" + read + "," + (int)(bodyBytes[0] & 0xFF));
+							Log.v(TAG,"Rec : len" + read );
 							continue;
 						}
 						offset+=read;
 						length=CC -offset;
-//						if(null!=respListener)
-//						{
-//							respListener.onSocketResponse(bodyBytes, read);
-//						}
-						Log.v(TAG,"Rec : len:" + read + "," + (int)(bodyBytes[0] & 0xFF));
+						if(null!=respListener)
+						{
+							respListener.onSocketResponse(bodyBytes, read);
+						}
+						Log.v(TAG,"Rec : len:" + read);
 					}
 					Log.v(TAG,"Rec :Close....");
 					reconn();//走到这一步，说明服务器socket断了

@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -25,6 +26,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -281,6 +285,18 @@ public class Util {
 		//			}
 		//		}
 
+		if (min_x < 0) {
+			min_x = 0;
+		}
+		if (max_x > screenWidth) {
+			max_x = screenWidth;
+		}
+		if (min_y < 0) {
+			min_y = 0;
+		}
+		if (max_y > screenHeight) {
+			max_y = screenHeight;
+		}
 		for (int m = min_y; m < max_y; m++) {
 			for (int n = min_x; n < max_x; n++) {
 				int r = (piex[(m * screenWidth + n) * 4] & 0xFF);
@@ -489,6 +505,8 @@ public class Util {
 		}
 		return ipaddress;
 	}
+	
+	
 
 	public static byte[] convertIpTobytes(String strIp) {
 		if (strIp == null) {
@@ -542,5 +560,29 @@ public class Util {
 		}  
 
 		return stringBuilder.toString();  
+	}
+	
+	public static final int WIFI_AP_STATE_DISABLING = 10; 
+	public static final int WIFI_AP_STATE_DISABLED = 11; 
+	public static final int WIFI_AP_STATE_ENABLING = 12; 
+	public static final int WIFI_AP_STATE_ENABLED = 13; 
+	public static final int WIFI_AP_STATE_FAILED = 14;
+	
+	public static int getWifiApState(Context mContext) { 
+		WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+		try { 
+			Method method = wifiManager.getClass().getMethod("getWifiApState"); 
+			int i = (Integer) method.invoke(wifiManager); 
+				
+			Log.i(TAG,"wifi state:  " + i ); 
+			return i; 
+		} catch (Exception e) { 
+			Log.e(TAG,"Cannot get WiFi AP state" + e); 
+			return WIFI_AP_STATE_FAILED; 
+		} 
+	}
+	public static boolean isApEnabled(Context mContext) { 
+		int state = getWifiApState(mContext); 
+		return WIFI_AP_STATE_ENABLING == state || WIFI_AP_STATE_ENABLED == state; 
 	}
 }
