@@ -1,17 +1,14 @@
 package com.example.navimagedemo;
 
 
-
-
-
-
-
-
 import com.autoio.lib.net.Client;
 import com.autoio.lib.net.ISocketResponse;
 import com.autoio.lib.net.TcpResponse;
 import com.autoio.lib.net.UdpBroadCast;
 import com.autoio.lib.util.Util;
+import com.autoio.lib.wifi.WifiAdmin;
+
+import com.autoio.lib.zxing.activity.CaptureActivity;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -21,6 +18,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnClickListener  {
 	private static final String TAG = "Hominlinx==>MainActivity";
@@ -30,6 +28,8 @@ public class MainActivity extends Activity implements OnClickListener  {
     Button stopService;
     Button startTest;
     Button stopTest;
+    Button wifiTest;
+    private TextView resultTextView;
     TcpResponse socketListener =  null;
     
     private Client user=null;
@@ -37,6 +37,8 @@ public class MainActivity extends Activity implements OnClickListener  {
 
     ScreenshotThread mScreenshotThread;
 	boolean screenshotQuit = false;
+	
+	WifiAdmin wifiAdmin = null;
 
 	public Client getClient() {
 		return user;
@@ -81,6 +83,14 @@ public class MainActivity extends Activity implements OnClickListener  {
 		stopTest.setOnClickListener(this);
 		startTest.setEnabled(true);
 		stopTest.setEnabled(false);
+		
+		wifiTest = (Button)findViewById(R.id.testwifi);
+		wifiTest.setOnClickListener(this);
+		
+		resultTextView = (TextView) this.findViewById(R.id.textView2);
+		
+		wifiAdmin = new WifiAdmin(this);
+		wifiAdmin.openWifi();
 	}
 
 	@Override
@@ -141,10 +151,62 @@ public class MainActivity extends Activity implements OnClickListener  {
 			stopTest.setEnabled(false);
 			Log.d(TAG, "testStop");
 			break;
+			
+		case R.id.testwifi:
+			Log.d(TAG, "testWififf");
+			//打开扫描界面扫描条形码或二维码
+			Intent openCameraIntent = new Intent(MainActivity.this,CaptureActivity.class);
+			startActivityForResult(openCameraIntent, 0);
+			// wifiAdmin.addNetWork(wifiAdmin.CreateWifiInfo("mytest", "yua", null, 2));
+//			if (ret == true) {
+//				Log.d(TAG, "testWifi connect ok!");
+//			} else {
+//				Log.d(TAG, "testwifi connect error!");
+//			}
+			break;
 		}
 		
 	}
 	
+	/*
+	 * receive scanner activity result in my activity.
+	 * 处理扫描结果（在界面上显示）
+	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			Bundle bundle = data.getExtras();
+			String scanResult = bundle.getString("result");
+			resultTextView.setText(scanResult);
+			connectWifi(scanResult);
+		}
+//		if (requestCode == CaptureActivity.QR_REQUEST_CODE) {
+//			Log.d(TAG, resultCode == RESULT_OK
+//					? data.getExtras().getString(CaptureActivity.QR_RESULT_STR)
+//							: "Scanned Nothing!");
+//		}
+	}
+
+	private void connectWifi(String str) {
+		System.out.println( "XXXXXXXXXXXXXxresult == " + str );
+		String[] results = str.split( "#" );
+		System.out.println( "XXXXXXXXXXXXXxresult == " + results.length + "," + results[0] );
+		if (results.length != 3) {
+			resultTextView.append("\n扫描错误。");
+			return;
+		}
+		String user = results[ 0 ];
+		String password = results[ 1 ];
+		int type = Integer.parseInt( results[ 2 ] );
+		boolean ret = wifiAdmin.addNetWork(wifiAdmin.CreateWifiInfo(user, password, null, type));
+		if (ret == false) {
+			resultTextView.append("\nwifi连接失败。");
+		}
+		
+		//resultTextView.setText(results.length);
+	}
 	/**
 	 * 保存截屏文件线程
 	 * 

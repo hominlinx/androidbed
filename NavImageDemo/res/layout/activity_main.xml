@@ -27,7 +27,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="230dp"
+        android:layout_height="290dp"
         android:orientation="vertical" >
 
 	        <LinearLayout
@@ -63,6 +63,21 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:text="关闭测试" />
+
+	    <Button
+	        android:id="@+id/testwifi"
+	        style="?android:attr/buttonStyleSmall"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:text="扫描二维码，连接wifi" />
+
+	   
+	    <TextView
+	        android:id="@+id/textView2"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="5.60"
+	        android:text="扫描结果：" />
 
 	    <LinearLayout 
 	        android:layout_width="match_parent"
