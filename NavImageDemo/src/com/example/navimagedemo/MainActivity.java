@@ -7,12 +7,16 @@ import com.autoio.lib.net.TcpResponse;
 import com.autoio.lib.net.UdpBroadCast;
 import com.autoio.lib.util.Util;
 import com.autoio.lib.wifi.WifiAdmin;
+import com.autoio.lib.wifi.WifiAdmin2;
 
 import com.autoio.lib.zxing.activity.CaptureActivity;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -23,6 +27,7 @@ import android.widget.TextView;
 public class MainActivity extends Activity implements OnClickListener  {
 	private static final String TAG = "Hominlinx==>MainActivity";
     private MyApplication myApplication;  
+    private Context mContext = null; 
   
     Button startService;
     Button stopService;
@@ -39,6 +44,7 @@ public class MainActivity extends Activity implements OnClickListener  {
 	boolean screenshotQuit = false;
 	
 	WifiAdmin wifiAdmin = null;
+	WifiAdmin2 wifiAdmin2 = null;
 
 	public Client getClient() {
 		return user;
@@ -89,8 +95,44 @@ public class MainActivity extends Activity implements OnClickListener  {
 		
 		resultTextView = (TextView) this.findViewById(R.id.textView2);
 		
-		wifiAdmin = new WifiAdmin(this);
+		mContext = this;
+//		wifiAdmin = new WifiAdmin(mContext);
+		wifiAdmin = new WifiAdmin(mContext) {
+
+			@Override
+			public Intent myRegisterReceiver(BroadcastReceiver receiver,
+					IntentFilter filter) {
+				// TODO Auto-generated method stub
+				MainActivity.this.registerReceiver(receiver, filter);  
+				return null;
+			}
+
+			@Override
+			public void myUnregisterReceiver(BroadcastReceiver receiver) {
+				// TODO Auto-generated method stub
+				MainActivity.this.unregisterReceiver(receiver); 
+			}
+
+			@Override
+			public void onNotifyWifiConnected() {
+				// TODO Auto-generated method stub
+				Log.v(TAG, "have connected success!");  
+                Log.v(TAG, "###############################"); 
+                //发送AUTH:由 Master 发送,用于传输加密的 SSID_m、PWD_m
+			}
+
+			@Override
+			public void onNotifyWifiConnectFailed() {
+				// TODO Auto-generated method stub
+				 Log.v(TAG, "have connected failed!");  
+                 Log.v(TAG, "###############################");  
+			}
+			
+		};
 		wifiAdmin.openWifi();
+		
+		wifiAdmin2 = new WifiAdmin2(mContext);
+		wifiAdmin2.openWifi();
 	}
 
 	@Override
@@ -182,17 +224,13 @@ public class MainActivity extends Activity implements OnClickListener  {
 			resultTextView.setText(scanResult);
 			connectWifi(scanResult);
 		}
-//		if (requestCode == CaptureActivity.QR_REQUEST_CODE) {
-//			Log.d(TAG, resultCode == RESULT_OK
-//					? data.getExtras().getString(CaptureActivity.QR_RESULT_STR)
-//							: "Scanned Nothing!");
-//		}
 	}
 
 	private void connectWifi(String str) {
-		System.out.println( "XXXXXXXXXXXXXxresult == " + str );
+		System.out.println( "connectWifi  == " + str );
 		String[] results = str.split( "#" );
-		System.out.println( "XXXXXXXXXXXXXxresult == " + results.length + "," + results[0] );
+		System.out.println( "connectWifi == " + results.length + "," + results[0] );
+		Log.d(TAG, "connectWifi:" + str);
 		if (results.length != 3) {
 			resultTextView.append("\n扫描错误。");
 			return;
@@ -200,10 +238,13 @@ public class MainActivity extends Activity implements OnClickListener  {
 		String user = results[ 0 ];
 		String password = results[ 1 ];
 		int type = Integer.parseInt( results[ 2 ] );
-		boolean ret = wifiAdmin.addNetWork(wifiAdmin.CreateWifiInfo(user, password, null, type));
-		if (ret == false) {
-			resultTextView.append("\nwifi连接失败。");
-		}
+		wifiAdmin.addNetwork(user, password, type);  
+		//wifiAdmin.addNetwork(wifiAdmin.CreateWifiInfo(user, password, null, 2));
+		//wifiAdmin.addNetWork2(wifiAdmin.CreateWifiInfo(user, password, null, 2));
+		//wifiAdmin2.addNetWork(wifiAdmin2.CreateWifiInfo(user, password, null, type));
+//		if (ret == false) {
+//			resultTextView.append("\nwifi连接失败。");
+//		}
 		
 		//resultTextView.setText(results.length);
 	}
