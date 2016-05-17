@@ -5,13 +5,19 @@ import com.autoio.lib.net.Client;
 import com.autoio.lib.net.ISocketResponse;
 import com.autoio.lib.net.TcpResponse;
 import com.autoio.lib.net.UdpBroadCast;
+import com.autoio.lib.net.UdpPairBroadCast;
+import com.autoio.lib.net.UdpPairReceive;
+import com.autoio.lib.net.UdpReceiveAndTcpConnect;
 import com.autoio.lib.util.Util;
 import com.autoio.lib.wifi.WifiAdmin;
 import com.autoio.lib.wifi.WifiAdmin2;
+import com.autoio.lib.wifi.WifiApAdmin;
 
 import com.autoio.lib.zxing.activity.CaptureActivity;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -22,6 +28,7 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnClickListener  {
@@ -34,17 +41,26 @@ public class MainActivity extends Activity implements OnClickListener  {
     Button startTest;
     Button stopTest;
     Button wifiTest;
+     EditText editPwd;
+     EditText editSsid;
+    
     private TextView resultTextView;
     TcpResponse socketListener =  null;
     
     private Client user=null;
 	UdpBroadCast udp = null;
+	UdpPairBroadCast udpPair = null;
+	UdpPairReceive pairReceiver = null;
+	UdpReceiveAndTcpConnect udpReceive = null;
+	WifiApAdmin apAdmin = null;
 
     ScreenshotThread mScreenshotThread;
 	boolean screenshotQuit = false;
 	
 	WifiAdmin wifiAdmin = null;
-	WifiAdmin2 wifiAdmin2 = null;
+	//UdpReceiveAndTcpConnect udpReceive = null;
+	
+	//WifiAdmin2 wifiAdmin2 = null;
 
 	public Client getClient() {
 		return user;
@@ -60,6 +76,18 @@ public class MainActivity extends Activity implements OnClickListener  {
 	public void stopUDP() {
 		if (udp != null) {
 			udp.quitFlag = true;
+		}
+	}
+	
+	public void startUDPPair() {
+		Log.d(TAG, "startUDPPair");
+		if (udpPair != null) {
+			udpPair.start();
+		}
+	}
+	public void stopUDPPair() {
+		if (udpPair != null) {
+			udpPair.quitFlag = true;
 		}
 	}
 	
@@ -95,7 +123,13 @@ public class MainActivity extends Activity implements OnClickListener  {
 		
 		resultTextView = (TextView) this.findViewById(R.id.textView2);
 		
+		 editPwd=(EditText)this.findViewById(R.id.editpwd);  
+		 editSsid=(EditText)this.findViewById(R.id.editssid);  
+		 editSsid.setText("AndroidAP");
+		 editPwd.setText("yzkj123456");
+		 
 		mContext = this;
+		
 //		wifiAdmin = new WifiAdmin(mContext);
 		wifiAdmin = new WifiAdmin(mContext) {
 
@@ -118,6 +152,16 @@ public class MainActivity extends Activity implements OnClickListener  {
 				// TODO Auto-generated method stub
 				Log.v(TAG, "have connected success!");  
                 Log.v(TAG, "###############################"); 
+                //手机连接仪表成功，需要发送手机的ssid和pwd给仪表。
+                
+                
+//                String ssid = editSsid.getText().toString();
+//                String pwd = editPwd.getText().toString();
+//                Log.v(TAG, "ssid:" + ssid);
+//                Log.v(TAG, "pwd:" + pwd);
+//                udpPair = new UdpPairBroadCast(mContext, ssid, pwd);
+//                new UdpPairReceive(handler_for_udpPairReceive).start();
+//        		startUDPPair();
                 //发送AUTH:由 Master 发送,用于传输加密的 SSID_m、PWD_m
 			}
 
@@ -131,8 +175,10 @@ public class MainActivity extends Activity implements OnClickListener  {
 		};
 		wifiAdmin.openWifi();
 		
-		wifiAdmin2 = new WifiAdmin2(mContext);
-		wifiAdmin2.openWifi();
+	
+		apAdmin = new WifiApAdmin(mContext, handler_for_wifiAP ); 
+//		wifiAdmin2 = new WifiAdmin2(mContext);
+//		wifiAdmin2.openWifi();
 	}
 
 	@Override
@@ -160,22 +206,20 @@ public class MainActivity extends Activity implements OnClickListener  {
 		// TODO Auto-generated method stub
 		switch (v.getId()) {  
 		case R.id.start:
-			udp = new UdpBroadCast(this);
-			startUDP();
-			Intent startIntent = new Intent(this, SendService.class);  
-			startService(startIntent); 
-			startService.setEnabled(false);
-			stopService.setEnabled(true);
-			 
+			//startService();
+			//stopUDP();
+			startAP();
 			Log.d(TAG, "start");
 	
 			break;
 		case R.id.stop:
-			stopUDP();
-			Intent stopIntent = new Intent(this, SendService.class);  
-			stopService(stopIntent); 
-			startService.setEnabled(true);
-			stopService.setEnabled(false);
+//			stopUDP();
+//			Intent stopIntent = new Intent(this, SendService.class);  
+//			stopService(stopIntent); 
+//			startService.setEnabled(true);
+//			stopService.setEnabled(false);
+			apAdmin.closeWifiAp();
+			stopSendService();
 			Log.d(TAG, "stop");
 			break;
 		case R.id.testStart:
@@ -196,10 +240,19 @@ public class MainActivity extends Activity implements OnClickListener  {
 			
 		case R.id.testwifi:
 			Log.d(TAG, "testWififf");
+			//WifiApAdmin.closeWifiAp(mContext);
+			apAdmin.closeWifiAp();
 			//打开扫描界面扫描条形码或二维码
-			Intent openCameraIntent = new Intent(MainActivity.this,CaptureActivity.class);
-			startActivityForResult(openCameraIntent, 0);
-			// wifiAdmin.addNetWork(wifiAdmin.CreateWifiInfo("mytest", "yua", null, 2));
+//			Intent openCameraIntent = new Intent(MainActivity.this,CaptureActivity.class);
+//			startActivityForResult(openCameraIntent, 0);
+			
+		
+			
+			wifiAdmin.openWifi();
+			wifiAdmin.addNetwork("mytest", "yuanguang", 3);  
+			
+			
+			
 //			if (ret == true) {
 //				Log.d(TAG, "testWifi connect ok!");
 //			} else {
@@ -238,10 +291,21 @@ public class MainActivity extends Activity implements OnClickListener  {
 		String user = results[ 0 ];
 		String password = results[ 1 ];
 		int type = Integer.parseInt( results[ 2 ] );
+		//WifiApAdmin.closeWifiAp(mContext); 
+		apAdmin.closeWifiAp();
+		Log.d(TAG, "connectWifi:" + user + "," + password + "," + type);
+		wifiAdmin.openWifi();
 		wifiAdmin.addNetwork(user, password, type);  
+		
+		
 		//wifiAdmin.addNetwork(wifiAdmin.CreateWifiInfo(user, password, null, 2));
 		//wifiAdmin.addNetWork2(wifiAdmin.CreateWifiInfo(user, password, null, 2));
-		//wifiAdmin2.addNetWork(wifiAdmin2.CreateWifiInfo(user, password, null, type));
+//		if (wifiAdmin2.isConnected()) {
+//			Log.d(TAG, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXconnect..");
+//		}
+//		wifiAdmin2.reConnection();
+//		Log.d(TAG, "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXconnect000..");
+//		wifiAdmin2.addNetWork(wifiAdmin2.CreateWifiInfo(user, password, null, 2));
 //		if (ret == false) {
 //			resultTextView.append("\nwifi连接失败。");
 //		}
@@ -269,4 +333,77 @@ public class MainActivity extends Activity implements OnClickListener  {
 			}
 		}
 	}
+	
+	private void startAP() {
+		//WifiApAdmin.closeWifiAp(mContext);
+		
+		apAdmin.closeWifiAp();
+	//	wifiAdmin.closeWifi();
+		String ssid = editSsid.getText().toString();
+		String pwd = editPwd.getText().toString();
+		apAdmin.startWifiAp(ssid, pwd);
+	}
+	private void startSendService() {
+		//stopSendService();
+		Intent startIntent = new Intent(this, SendService.class);  
+//		udp = new UdpBroadCast(this);
+//		startUDP();	
+//		
+//		udpReceive =  new UdpReceiveAndTcpConnect(handler_for_udpReceiveAndtcpSend, user);
+//		udpReceive.start();
+//		startService(startIntent); 
+		startService.setEnabled(false);
+		stopService.setEnabled(true);
+		 
+	}
+	
+	private void stopSendService() {
+		stopUDP();
+		Intent stopIntent = new Intent(this, SendService.class);  
+		stopService(stopIntent); 
+		startService.setEnabled(true);
+		stopService.setEnabled(false);
+	}
+	Handler handler_for_udpPairReceive = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		super.handleMessage(msg);
+    		if (msg.what == UdpPairReceive.MSG_ID2) { // connect ok...
+    			Log.d(TAG, "Udp Pair Receive  ok....");
+    			stopUDPPair();
+    			//打开手机AP模式，并且启动服务。。
+    			
+    			startAP();	
+             }
+    		
+    	}
+    };	 
+    
+    Handler handler_for_wifiAP = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		super.handleMessage(msg);
+    		if (msg.what == WifiApAdmin.MSG_ID3) { // connect ok...
+    			Log.d(TAG, "handler_for_wifiAP   ok....");
+    			startSendService();
+    			
+             }		
+    	}
+    };
+    
+    public final static int MSG_ID1 = 0x222;
+    Handler handler_for_udpReceiveAndtcpSend = new Handler() {
+    	@Override
+    	public void handleMessage(Message msg) {
+    		super.handleMessage(msg);
+    		if (msg.what == MSG_ID1) { // connect ok...
+    			Log.d(TAG, "xxxxConnect ok....");
+    			//stopUDP();
+    			//quitFlag  = true;
+    			//tcpSend.start();
+             }
+    		
+    	}
+    };	
+   
 }

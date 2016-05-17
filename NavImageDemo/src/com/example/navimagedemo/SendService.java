@@ -15,7 +15,7 @@ public class SendService extends Service {
 	MyApplication myApplication; 
 	MainActivity mainActivity;
 	public static final String TAG = "Hominlinx==>SendService";
-	public final static int MSG_ID1 = 0x222;
+	
 	TcpSend tcpSend;
 	Client user;
 	
@@ -38,7 +38,7 @@ public class SendService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {  
 		Log.d(TAG, "onStartCommand() executed"); 
 
-		new UdpReceiveAndTcpConnect(handler_for_udpReceiveAndtcpSend, user).start();
+		
 		return super.onStartCommand(intent, flags, startId);  
 		
 	}  
@@ -50,17 +50,6 @@ public class SendService extends Service {
 		Log.d(TAG, "onDestroy() executed");  
 	}  
 	
-	Handler handler_for_udpReceiveAndtcpSend = new Handler() {
-    	@Override
-    	public void handleMessage(Message msg) {
-    		super.handleMessage(msg);
-    		if (msg.what == MSG_ID1) { // connect ok...
-    			Log.d(TAG, "Connect ok....");
-    			mainActivity.stopUDP();
-    			tcpSend.start();
-             }
-    		
-    	}
-    };	 
+	
 
 }

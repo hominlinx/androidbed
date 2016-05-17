@@ -445,10 +445,13 @@ public class Util {
     }  
 
     public static byte[] strTobytes(String str, int len) {
+    	Log.d(TAG, "tttt:" + str.length() + ",len:" + len);
     	if (str.length() != 2 * len) {
+    		Log.d(TAG, "XXXXXXXXX====");
     		return null;
     	}
     	byte[] t = str.getBytes();
+    	Log.d(TAG, "aa:" + t.length);
     	byte[] temp = new byte[len];
     	for(int i = 0; i < len; ++i) {
     		//temp[i] = (((str[i + 0] << 8) | str[i + 1] & 0xff)); 

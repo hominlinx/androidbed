@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
@@ -33,6 +34,7 @@ public class UdpReceiveAndTcpConnect extends Thread {
 	private Client user=null;
 
 	public UdpReceiveAndTcpConnect(Handler handler, Client user) {
+		Log.d(TAG, "===============================UdpReceiveAndTcpConnect=====================");
 		this.handler = handler;
 		this.user = user;
 	}
@@ -42,18 +44,22 @@ public class UdpReceiveAndTcpConnect extends Thread {
 		Message msg;
 		String information;
 		boolean quitFlag = false; 
-
+		Log.d(TAG, "===============================UdpReceiveAndTcpConnect run=====================");
 		byte[] data = new byte[256];
 		DatagramSocket dgSocket = null;
 		try {
-			dgSocket = new DatagramSocket(10220);
+			//dgSocket = new DatagramSocket(10220);
+		    if(dgSocket == null){  
+		    	dgSocket = new DatagramSocket(null);  
+		    	dgSocket.setReuseAddress(true);  
+		    	dgSocket.bind(new InetSocketAddress(10220));  
+		    }  
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		while (!quitFlag) {
 			try {
-
 
 				dp =new DatagramPacket(data, data.length); 
 				if (dgSocket != null) {
@@ -99,9 +105,9 @@ public class UdpReceiveAndTcpConnect extends Thread {
 						user.reconn();
 					}
 
-					msg = new Message();
-					msg.what = SendService.MSG_ID1;
-					handler.sendMessage(msg);
+//					msg = new Message();
+//					msg.what = MSG_ID1;
+//					handler.sendMessage(msg);
 					quitFlag = true;
 				}
 			}

@@ -66,6 +66,7 @@ public abstract class WifiAdmin {
 
 	// 打开wifi
 	public void openWifi() {
+		
 		if (!mWifiManager.isWifiEnabled()) {
 			mWifiManager.setWifiEnabled(true);
 		}
@@ -223,15 +224,16 @@ public abstract class WifiAdmin {
           
         register();  
           
-        WifiApAdmin.closeWifiAp(mContext);  
-          
+        //WifiApAdmin.closeWifiAp(mContext);  
+        startScan();
         int wcgID = mWifiManager.addNetwork(wcg);  
+        
         boolean b = mWifiManager.enableNetwork(wcgID, true);  
         if(b) {
-        	Toast.makeText(mContext, "网络连接成功！", Toast.LENGTH_SHORT).show();
+        	Toast.makeText(mContext, "网络连接成功！ " + wcgID, Toast.LENGTH_SHORT).show();
         }
         else {
-        	Toast.makeText(mContext, "网络连接失败！", Toast.LENGTH_SHORT).show();
+        	Toast.makeText(mContext, "网络连接失败！" + wcgID , Toast.LENGTH_SHORT).show();
         }
     }  
 
@@ -254,10 +256,11 @@ public abstract class WifiAdmin {
 //        if (type != TYPE_NO_PASSWD && type != TYPE_WEP && type != TYPE_WPA) {  
 //            Log.e(TAG, "addNetwork() ## unknown type = " + type);  
 //        }  
-//          
+//        
+     
         stopTimer();  
         unRegister();  
-          
+        
         addNetwork(CreateWifiInfo(ssid, passwd, type));  
     }  
 	// 断开指定ID的网络
@@ -274,167 +277,7 @@ public abstract class WifiAdmin {
 		mWifiManager.reconnect();
 	}
 
-//	public WifiConfiguration CreateWifiInfo(String SSID, String Password,String Identity,
-//			int Type) {
-//		String mSsid="\"" + SSID + "\"";
-//		String mPassword="\"" + Password + "\"";
-//		String mIdentity="\"" + Identity + "\"";
-//		WifiConfiguration config = new WifiConfiguration();
-//		config.allowedAuthAlgorithms.clear();
-//		config.allowedGroupCiphers.clear();
-//		config.allowedKeyManagement.clear();
-//		config.allowedPairwiseCiphers.clear();
-//		config.allowedProtocols.clear();
-//		config.SSID = mSsid;
-//		// WIFICIPHER_NOPASS
-//		if (Type == 0) {
-//			config.wepKeys[0] = "";
-//			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-//			config.wepTxKeyIndex = 0;
-//		}
-//		// WIFICIPHER_WEP
-//		if (Type == 1) {
-//			config.hiddenSSID = false;
-//			config.wepKeys[0] = mPassword;
-//			config.allowedAuthAlgorithms
-//					.set(WifiConfiguration.AuthAlgorithm.SHARED);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
-//			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-//			config.wepTxKeyIndex = 0;
-//		}
-//		// WIFICIPHER_WPA
-//		if (Type == 2) {
-//			config.hiddenSSID = false;
-//			config.status = WifiConfiguration.Status.ENABLED;
-//			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-//			config.allowedAuthAlgorithms
-//					.set(WifiConfiguration.AuthAlgorithm.OPEN);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-//			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-//			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-//			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-//			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-//
-//			config.preSharedKey = mPassword;
-//		}
-//		if(Type == 3){
-//			config.hiddenSSID = false;
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-//			config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
-//			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-//			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-//			config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
-//			config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
-//			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-//			config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
-//			
-//			if(android.os.Build.VERSION.SDK_INT<18){
-//				
-//				try {
-//					final String INT_PRIVATE_KEY = "private_key";
-//					final String INT_PHASE2 = "phase2";
-//					final String INT_PASSWORD = "password";
-//					final String INT_IDENTITY = "identity";
-//					final String INT_EAP = "eap";
-//					final String INT_CLIENT_CERT = "client_cert";
-//					final String INT_CA_CERT = "ca_cert";
-//					final String INT_ANONYMOUS_IDENTITY = "anonymous_identity";
-//					final String INT_ENTERPRISEFIELD_NAME ="android.net.wifi.WifiConfiguration$EnterpriseField";
-//					boolean noEnterpriseFieldType = true;
-//					
-//					final String ENTERPRISE_EAP = "PEAP";
-//					final String ENTERPRISE_PHASE2 = "MSCHAPV2";
-//			       
-//			        Class[] wcClasses = WifiConfiguration.class.getClasses();
-//			        Class wcEnterpriseField = null;
-//
-//			        for (Class wcClass : wcClasses)
-//			            if (wcClass.getName().equals(INT_ENTERPRISEFIELD_NAME)) 
-//			            {
-//			                wcEnterpriseField = wcClass;
-//			                noEnterpriseFieldType = false;
-//			                break;
-//			            }
-//			        
-//			        Field wcefAnonymousId = null, 
-//			        	wcefCaCert = null,
-//			        	wcefClientCert = null,
-//			        	wcefEap = null, 
-//			        	wcefIdentity = null, 
-//			        	wcefPassword = null, 
-//			        	wcefPhase2 = null, 
-//			        	wcefPrivateKey = null;
-//			        Field[] wcefFields = WifiConfiguration.class.getFields();
-//			        for (Field wcefField : wcefFields) 
-//			        {
-//			            if (wcefField.getName().equals(INT_ANONYMOUS_IDENTITY))
-//			                wcefAnonymousId = wcefField;
-//			            else if (wcefField.getName().equals(INT_CA_CERT))
-//			                wcefCaCert = wcefField;
-//			            else if (wcefField.getName().equals(INT_CLIENT_CERT))
-//			                wcefClientCert = wcefField;
-//			            else if (wcefField.getName().equals(INT_EAP))
-//			                wcefEap = wcefField;
-//			            else if (wcefField.getName().equals(INT_IDENTITY))
-//			                wcefIdentity = wcefField;
-//			            else if (wcefField.getName().equals(INT_PASSWORD))
-//			                wcefPassword = wcefField;
-//			            else if (wcefField.getName().equals(INT_PHASE2))
-//			                wcefPhase2 = wcefField;
-//			            else if (wcefField.getName().equals(INT_PRIVATE_KEY))
-//			                wcefPrivateKey = wcefField;
-//			        }
-//
-//
-//			        Method wcefSetValue = null;
-//			        if(!noEnterpriseFieldType){
-//			        for(Method m: wcEnterpriseField.getMethods())
-//			             if(m.getName().trim().equals("setValue"))
-//			                wcefSetValue = m;
-//			        }
-//			        //EAP Method
-//			        if(!noEnterpriseFieldType){
-//			            wcefSetValue.invoke(wcefEap.get(config), ENTERPRISE_EAP);
-//			        }
-//			        //EAP Phase 2 Authentication
-//			        if(!noEnterpriseFieldType){
-//			            wcefSetValue.invoke(wcefPhase2.get(config), ENTERPRISE_PHASE2);
-//			        }
-//			        //EAP Identity
-//			        if(!noEnterpriseFieldType){
-//			            wcefSetValue.invoke(wcefIdentity.get(config), mIdentity);
-//			        }
-//			        //EAP Password
-//			        if(!noEnterpriseFieldType){
-//			            wcefSetValue.invoke(wcefPassword.get(config), mPassword);
-//			        }
-//
-//			    } catch (Exception e){
-//			        // TODO Auto-generated catch block
-//			    	return null;
-//			    }
-//
-//			}
-//			
-//			else{
-//				/*WifiEnterpriseConfig enterpriseConfig = new WifiEnterpriseConfig(); 
-//				enterpriseConfig.setIdentity(Identity);
-//				enterpriseConfig.setPassword(Password);
-//				enterpriseConfig.setEapMethod(WifiEnterpriseConfig.Eap.PEAP);
-//				enterpriseConfig.setPhase2Method(WifiEnterpriseConfig.Phase2.MSCHAPV2); 
-//				config.enterpriseConfig = enterpriseConfig;*/
-//			}
-//			
-//		}
-//		mWifiConfigurations.add(config);
-//		return config;
-//	}
+
 
 	public WifiConfiguration CreateWifiInfo(String SSID, String password, int type) {
 		WifiConfiguration config = new WifiConfiguration();
@@ -445,10 +288,10 @@ public abstract class WifiAdmin {
 		config.allowedProtocols.clear();
 		config.SSID = "\"" + SSID + "\"";
 
-		WifiConfiguration tempConfig = this.IsExsits(SSID);
-		if (tempConfig != null) {
-			mWifiManager.removeNetwork(tempConfig.networkId);
-		}
+//		WifiConfiguration tempConfig = this.IsExsits(SSID);
+//		if (tempConfig != null) {
+//			mWifiManager.removeNetwork(tempConfig.networkId);
+//		}
 
 		if (type == 1) {
 			// WIFICIPHER_NOPASS
@@ -481,7 +324,9 @@ public abstract class WifiAdmin {
 			config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
 			config.status = WifiConfiguration.Status.ENABLED;
 		}
-		
+		Log.d(TAG, "++++++++++++++++++++????? >>> " + config.toString());
+		int wcgID = mWifiManager.addNetwork(config);  
+		Log.d(TAG, "++++++++++++++++++++ >>> " + wcgID);
 		return config;
 	} 
 	 
@@ -538,7 +383,7 @@ public abstract class WifiAdmin {
         		Log.d(TAG, "wifi connected");
         		stopTimer();  
         		onNotifyWifiConnected();  
-        		unRegister();  
+        		//unRegister();  
         		break;
         	case WIFI_CONNECT_FAILED:
         		Log.d(TAG, "wifi failed");

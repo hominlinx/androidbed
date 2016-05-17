@@ -8,6 +8,8 @@ import java.util.TimerTask;
 import android.content.Context;  
 import android.net.wifi.WifiConfiguration;  
 import android.net.wifi.WifiManager;  
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;  
 
 /** 
@@ -15,19 +17,29 @@ import android.util.Log;
  * 
  */ 
 public class WifiApAdmin {
-	public static final String TAG = "WifiApAdmin";  
+	public static final String TAG = "Hominlinx==>WifiApAdmin";  
     
-    public static void closeWifiAp(Context context) {  
-        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);   
-        closeWifiAp(wifiManager);  
+	public final static int  MSG_ID3 = 0x224;
+	public final static int  MSG_ID4 = 0x225;
+	Handler handler = new Handler();
+//    public static void closeWifiAp(Context context) {  
+//        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);   
+//        closeWifiAp(wifiManager); 
+//        
+//    }  
+    
+    public  void closeWifiAp() {  
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);   
+        closeWifiAp(wifiManager); 
     }  
-      
+     
+   
     private WifiManager mWifiManager = null;  
       
     private Context mContext = null;  
-    public WifiApAdmin(Context context) {  
+    public WifiApAdmin(Context context, Handler handler) {  
         mContext = context;  
-          
+        this.handler = handler;
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);    
           
         closeWifiAp(mWifiManager);  
@@ -46,23 +58,33 @@ public class WifiApAdmin {
         stratWifiAp();  
           
         MyTimerCheck timerCheck = new MyTimerCheck() {  
-              
+        	Message msg;
+        	
             @Override  
             public void doTimerCheckWork() {  
                 // TODO Auto-generated method stub  
-                  
+            	
                 if (isWifiApEnabled(mWifiManager)) {  
                     Log.v(TAG, "Wifi enabled success!");  
+                  
+                    msg = new Message();
+					msg.what = MSG_ID3;
+					handler.sendMessage(msg);
                     this.exit();  
                 } else {  
                     Log.v(TAG, "Wifi enabled failed!");  
+                   
                 }  
             }  
-  
+
             @Override  
             public void doTimeOutWork() {  
-                // TODO Auto-generated method stub  
-                this.exit();  
+            	// TODO Auto-generated method stub  
+
+            	msg = new Message();
+            	msg.what = MSG_ID4;
+            	handler.sendMessage(msg);
+            	this.exit();  
             }  
         };  
         timerCheck.start(15, 1000);  

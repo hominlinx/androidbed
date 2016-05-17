@@ -8,6 +8,8 @@ import com.autoio.lib.util.Util;
 
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 /**
@@ -21,8 +23,11 @@ public class UdpBroadCast extends Thread {
 	static int PORT = 10220;
 	public boolean quitFlag = false;
 	Context m_context;
+	UdpReceiveAndTcpConnect udpReceive = null;
 	public UdpBroadCast(Context context) {
 		m_context = context;
+//		udpReceive =  new UdpReceiveAndTcpConnect(handler_for_udpReceiveAndtcpSend, null);
+//		udpReceive.start();
 	}
 	@Override
 	public void run() {
@@ -33,7 +38,7 @@ public class UdpBroadCast extends Thread {
 			host_ip = Util.modifyIP(Util.getLocalHostIp());
 		}
 		Log.d(TAG, "ap:" + Util.isApEnabled(m_context));
-		 
+		
 		Log.d(TAG, "ip:" + host_ip);
 
 		while(!quitFlag) {
@@ -44,16 +49,20 @@ public class UdpBroadCast extends Thread {
 			}  
 			try {
 
+				Log.d(TAG, "app:" + Util.isApEnabled(m_context));
+				
+				Log.d(TAG, "ipp:" + host_ip);
+				
 				DatagramSocket dgSocket=new DatagramSocket(); 
 
-				//DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName(host_ip),PORT);
-				DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName("255.255.255.255"),PORT);
-
-
+				DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName(host_ip),PORT);
+				//DatagramPacket dgPacket=new DatagramPacket(dataV1,dataV1.length,InetAddress.getByName("255.255.255.255"),PORT);
 				dgSocket.send(dgPacket);  
 				dgSocket.close();  
-				Log.d(TAG, "udp broadcast ok....");
+				Log.d(TAG, "udp broadcast ok......");
 
+				
+				
 			} catch (Exception e) {  
 				e.printStackTrace();  
 			}  
@@ -61,4 +70,18 @@ public class UdpBroadCast extends Thread {
 
 	}
 
+//	 public final static int MSG_ID1 = 0x222;
+//	    Handler handler_for_udpReceiveAndtcpSend = new Handler() {
+//	    	@Override
+//	    	public void handleMessage(Message msg) {
+//	    		super.handleMessage(msg);
+//	    		if (msg.what == MSG_ID1) { // connect ok...
+//	    			Log.d(TAG, "Connect ok....");
+//	    			//stopUDP();
+//	    			quitFlag  = true;
+//	    			//tcpSend.start();
+//	             }
+//	    		
+//	    	}
+//	    };	 
 }
